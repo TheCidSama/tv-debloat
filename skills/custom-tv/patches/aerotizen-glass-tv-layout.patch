@@ -1,0 +1,1184 @@
+diff --git a/launcher/css/card-modes.css b/launcher/css/card-modes.css
+index 35103e1..ec324f2 100644
+--- a/launcher/css/card-modes.css
++++ b/launcher/css/card-modes.css
+@@ -143,3 +143,15 @@
+ 
+ /* Native Samsung artwork stays at its original source resolution in both layouts. */
+ .app-grid.cards-rectangle .app-artwork { object-fit: contain; background: #111; }
++
++/* Six across: the TV layout's single bottom row. */
++.app-grid.cards-square.cols-6 { justify-content: flex-start; gap: 30px 28px; }
++.app-grid.cards-square.cols-6 .tile { flex: 0 0 auto; min-width: 0; width: 264px; height: 264px; }
++.app-grid.cards-rectangle.cols-6 { gap: 30px 28px; }
++.app-grid.cards-rectangle.cols-6 .tile { width: 264px; height: 138px; gap: 10px; padding: 0 10px; }
++.app-grid.cards-rectangle.cols-6 .tile.app-tile .app-fallback { gap: 10px; }
++.app-grid.cards-rectangle.cols-6 .tile.app-tile .logo { width: 64px; height: 64px; }
++.app-grid.cards-rectangle.cols-6 .tile.app-tile .app-fallback.logo-only .logo { width: 170px; height: 86px; }
++.app-grid.cards-rectangle.cols-6 .tile.app-tile .app-fallback.logo-big .logo { height: 124px; }
++.app-grid.cards-rectangle.cols-6 .tile.app-tile .name { font-size: 20px; }
++.app-grid.cards-rectangle.cols-6 .tile.fire .name { font-size: 20px; }
+diff --git a/launcher/css/glass.css b/launcher/css/glass.css
+new file mode 100644
+index 0000000..527066f
+--- /dev/null
++++ b/launcher/css/glass.css
+@@ -0,0 +1,187 @@
++/* Glass themes: Glass, Frost and Crystal. Classic leaves the original look alone.
++   js/theme.js sets the body classes, --focus and --accent-rgb.
++   Kept cheap for TV GPUs: no backdrop-filter or masks, focus rings are spread-only shadows,
++   and only transform/opacity animate. */
++
++body.theme-glass   { --g-fill: rgba(255,255,255,.075); --g-fill2: rgba(255,255,255,.14); --g-edge: rgba(255,255,255,.17); --g-top: rgba(255,255,255,.26); --g-sheet: rgba(6,8,18,.86); }
++body.theme-frost   { --g-fill: rgba(255,255,255,.17);  --g-fill2: rgba(255,255,255,.28); --g-edge: rgba(255,255,255,.42); --g-top: rgba(255,255,255,.55); --g-sheet: rgba(30,36,54,.86); }
++body.theme-crystal { --g-fill: rgba(var(--accent-rgb),.17); --g-fill2: rgba(var(--accent-rgb),.30); --g-edge: rgba(var(--accent-rgb),.55); --g-top: rgba(255,255,255,.34); --g-sheet: rgba(8,8,22,.86); }
++
++/* One recipe for every glass surface. */
++body.glass-ui .view-tabs,
++body.glass-ui .topbar-right,
++body.glass-ui .topbar-left > .icon-btn,
++body.glass-ui .pill.unit,
++body.glass-ui .section-tab,
++body.glass-ui .slider,
++body.glass-ui .theme-card,
++body.glass-ui .small .tile {
++  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0) 55%), var(--g-fill);
++  border: 1px solid var(--g-edge);
++  box-shadow: inset 0 1px 0 var(--g-top);
++}
++
++/* ---- TV layout (all glass themes): clock top left, apps along the bottom ----
++   Light by design: no fade masks or dock panel, tiles are not GPU layers until they animate,
++   and focus changes repaint one tile ring plus one small halo layer. */
++body.glass-ui #home-root > .topbar { justify-content: flex-end; gap: 20px; height: 120px; padding: 0 64px; }
++/* Concentric pills: the 60px highlight sits 8px inside the 76px bar (7px padding + 1px border),
++   so its radius is the bar's 38px minus 8. */
++body.glass-ui #home-root > .topbar > .view-tabs { order: 1; border-radius: 38px; }
++body.glass-ui #home-root .topbar > .view-tabs .view-tab,
++body.glass-ui #home-root #aero-tab-glider { border-radius: 30px; }
++body.glass-ui #home-root > .topbar > .topbar-left { order: 2; gap: 20px; }
++body.glass-ui .view-tab.active { background: rgba(255,255,255,.2); color: #fff; }
++body.glass-ui .topbar-left > .icon-btn { width: 64px; height: 64px; }
++body.glass-ui .topbar-left > .icon-btn svg { width: 32px; height: 32px; }
++
++/* The header clock becomes the big clock: date (and weather) above, time below. */
++body.glass-ui #home-root > .topbar > .topbar-right {
++  position: absolute; left: 64px; top: 150px; display: grid; grid-template-columns: auto auto 1fr;
++  align-items: baseline; gap: 0 28px; padding: 0; height: auto; background: none; border: 0; box-shadow: none;
++}
++body.glass-ui .topbar-right #custom-clock-root { grid-column: 1 / 4; }
++body.glass-ui .topbar-right .date { grid-row: 1; grid-column: 1; font-size: 40px; color: rgba(255,255,255,.72); }
++body.glass-ui .topbar-right .weather { grid-row: 1; grid-column: 2; font-size: 36px; margin: 0; }
++body.glass-ui .topbar-right .time {
++  grid-row: 2; grid-column: 1 / 4; font-size: 200px; font-weight: 700; line-height: 1; letter-spacing: -.02em;
++  text-align: left; margin-top: 6px;
++}
++/* All apps needs the room. */
++body.glass-ui #home-root > .topbar.page-apps > .topbar-right { visibility: hidden; }
++
++/* The rows start under the header and the Home page pads them down to the bottom of the
++   screen, so scrolling to the inputs slides the apps up over the (faded-out) clock. */
++#home-root > .content-viewport.tv-layout {
++  position: absolute; left: 0; right: 0; top: 130px; bottom: 0; height: auto;
++  -webkit-mask-image: none; mask-image: none;
++}
++.tv-layout.page-home main { padding-top: 458px; }
++body.glass-ui #home-root > .topbar > .topbar-right { transition: opacity .25s ease-out; }
++body.glass-ui #home-root.home-scrolled > .topbar > .topbar-right { opacity: 0; }
++#home-root .tv-layout > .content-mask { -webkit-mask-image: none; mask-image: none; transition: none; }
++/* Same 64px sides as the classic layout, so every Apps-per-row choice still fits one row. */
++.tv-layout main { padding: 28px 64px 0; }
++
++/* Halo in the focused app's colour (components/Halo.tsx): half-size layers scaled up,
++   cross-faded with opacity. */
++.halo {
++  position: fixed; top: 0; left: 0; width: 960px; height: 540px; z-index: -1; pointer-events: none;
++  transform: scale(2); transform-origin: 0 0;
++}
++.halo-layer {
++  position: absolute; top: 0; left: 0; width: 960px; height: 540px;
++  opacity: 0; transition: opacity .4s ease-out; will-change: opacity;
++}
++.halo-layer.on { opacity: .6; }
++body.theme-frost .halo-layer.on { opacity: .75; }
++
++/* App row: banners with the focused app's name underneath. */
++/* #home-root outranks the per-column gaps in card-modes.css; the space below each row holds the name. */
++#home-root .tv-layout .app-grid { row-gap: 76px; margin: 0 0 72px; }
++.tv-layout .app-grid .tile { border-radius: 18px; }
++.tv-layout .app-grid.cards-rectangle .tile,
++.tv-layout .app-grid.cards-rectangle .tile::before { border-radius: 18px; }
++.tv-layout .app-grid.cards-rectangle .tile {
++  overflow: visible; box-shadow: none !important; transform: none !important;
++  transition: transform .14s ease-out !important;
++}
++.tv-layout .app-grid .tile.focused,
++.tv-layout .app-grid.cards-rectangle .tile.focused,
++.tv-layout .app-grid.cards-rectangle .tile.moving {
++  transform: scale(1.08) !important; z-index: 8;
++  box-shadow: 0 0 0 4px #fff, 0 0 0 9px rgba(var(--accent-rgb),.7) !important;
++}
++.tv-layout .app-grid .tile.app-tile img.logo { border-radius: 16px; }
++.tv-layout .app-grid .tile.focused::after {
++  content: attr(aria-label); position: absolute; left: -60px; right: -60px; top: 100%; margin-top: 16px;
++  font-size: 26px; font-weight: 500; line-height: 32px; color: #fff; text-align: center;
++  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;
++}
++body.no-hero .tv-layout .app-grid .tile.focused::after { content: none; }
++
++/* Inputs live just below the bottom edge; pressing Down from the apps scrolls them in. */
++.tv-layout .inputs-wrap { margin-top: 380px; }
++.tv-layout #inputs { gap: 28px; }
++.tv-layout #inputs .tile {
++  flex: 0 0 264px; max-width: 264px; height: 120px; min-height: 0; border-radius: 18px;
++  flex-direction: column; justify-content: center; align-items: center; gap: 10px; padding: 0 14px;
++}
++.tv-layout #inputs .tile svg { width: 44px; height: 44px; border-radius: 8px; }
++.tv-layout #inputs .tile .name { font-size: 24px; text-align: center; max-width: 100%; }
++.tv-layout #inputs .tile .name .sub { font-size: 18px; }
++.tv-layout #inputs .tile.focused { box-shadow: 0 0 0 4px #fff, 0 0 0 9px rgba(var(--accent-rgb),.7); }
++
++/* Continue Watching keeps its row, with a quieter heading. */
++body.glass-ui .row-wrap h2 {
++  font-size: 24px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.6); margin: 0 0 18px 4px;
++}
++body.glass-ui .small .tile .name { color: #fff; }
++body.glass-ui .small .tile.focused { background: var(--g-fill2); }
++/* inset shadow, not a border: a border would narrow the card and its progress bar */
++body.glass-ui .continue-card { border-radius: 18px; box-shadow: inset 0 0 0 1px var(--g-edge); background: var(--g-fill2); }
++body.glass-ui .continue-card.focused { box-shadow: 0 0 0 4px #fff, 0 0 0 9px rgba(var(--accent-rgb),.7); }
++
++/* ---- Settings ---- */
++body.glass-ui .sheet { background: var(--g-sheet); }
++body.glass-ui .sheet h2 { font-size: 56px; letter-spacing: -.01em; margin-bottom: 26px; }
++body.glass-ui .sheet h3 {
++  font-size: 24px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.66); margin: 0 0 18px 4px;
++}
++body.glass-ui .sheet .hint { margin-left: 4px; }
++body.glass-ui .pill.unit { color: #fff; }
++body.glass-ui .pill.unit.on, body.glass-ui .section-tab.on {
++  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0) 60%), rgba(var(--accent-rgb),.78);
++  border-color: rgba(255,255,255,.4);
++}
++body.glass-ui .pill.unit.focused, body.glass-ui .section-tab.focused {
++  box-shadow: 0 0 0 3px #fff, 0 0 0 8px rgba(var(--accent-rgb),.75);
++}
++body.glass-ui .swatch { border: 1px solid var(--g-edge); border-radius: 16px; }
++body.glass-ui .swatch.focused { box-shadow: 0 0 0 3px #fff, 0 0 0 9px rgba(var(--accent-rgb),.75); }
++body.glass-ui .grid .tile { border-radius: 20px; }
++body.glass-ui .slider.focused { box-shadow: 0 0 0 3px rgba(255,255,255,.95), 0 0 0 8px rgba(var(--accent-rgb),.7); }
++
++/* Settings sections: category tabs, then the chosen section only. */
++.section-tabs { display: flex; gap: 16px; margin: 0 0 40px; }
++.section-tab {
++  padding: 16px 34px; border-radius: 999px; font-size: 28px; font-weight: 500; color: #fff; white-space: nowrap;
++  background: #1c1c1e; border: 1px solid transparent;
++}
++.section-tab.on { background: var(--focus); }
++.section-tab.focused { transform: none; box-shadow: 0 0 0 3px #000, 0 0 0 7px #fff; }
++
++/* Theme cards and accent colours */
++.theme-cards { display: flex; gap: 24px; margin-bottom: 44px; }
++.theme-card {
++  position: relative; width: 420px; padding: 18px 20px 20px; border-radius: 26px; background: #1c1c1e;
++  display: flex; flex-direction: column; gap: 4px; transition: transform .15s ease-out;
++}
++.theme-card b { font-size: 30px; font-weight: 600; margin-top: 12px; }
++.theme-card span { font-size: 22px; color: var(--muted); }
++.theme-card.focused { transform: scale(1.04); box-shadow: 0 0 0 3px #fff, 0 0 0 8px var(--focus); }
++.theme-card.on::after {
++  content: ""; position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; border-radius: 50%;
++  background: var(--focus) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/24px no-repeat;
++}
++.theme-preview {
++  display: flex; align-items: flex-end; gap: 10px; height: 104px; padding: 14px; border-radius: 16px; overflow: hidden;
++  background: radial-gradient(120% 140% at 20% 0%, #3a2a78 0%, #0c0c1c 60%);
++}
++.theme-preview i { flex: 1; height: 62%; border-radius: 10px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
++.theme-preview i:nth-child(2) { height: 78%; }
++.theme-card-frost .theme-preview i { background: rgba(255,255,255,.3); border-color: rgba(255,255,255,.55); }
++.theme-card-crystal .theme-preview i { background: rgba(var(--accent-rgb),.32); border-color: rgba(var(--accent-rgb),.8); }
++.theme-card-classic .theme-preview { background: #000; }
++.theme-card-classic .theme-preview i { background: #1c1c1e; border: 0; box-shadow: none; border-radius: 6px; }
++
++.accents { display: flex; gap: 30px; margin: 4px 0 64px; padding-left: 6px; }
++.accent-dot { position: relative; width: 72px; height: 72px; border-radius: 50%; box-shadow: inset 0 2px 0 rgba(255,255,255,.35), 0 8px 18px rgba(0,0,0,.4); }
++.accent-dot span { position: absolute; top: 84px; left: 50%; transform: translateX(-50%); font-size: 20px; color: var(--muted); white-space: nowrap; }
++.accent-dot.on::after {
++  content: ""; position: absolute; inset: 0; border-radius: 50%;
++  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/40px no-repeat;
++}
++.accent-dot.focused { transform: scale(1.18); box-shadow: 0 0 0 4px #000, 0 0 0 9px #fff; }
++
++@media (prefers-reduced-motion: reduce) { .theme-card, .accent-dot { transition: none; } }
+diff --git a/launcher/index.html b/launcher/index.html
+index 66216c7..6bad33e 100644
+--- a/launcher/index.html
++++ b/launcher/index.html
+@@ -10,6 +10,7 @@
+   <link rel="stylesheet" href="css/card-modes.css">
+   <link rel="stylesheet" href="css/tile-actions.css">
+   <link rel="stylesheet" href="css/photo-weather.css">
++  <link rel="stylesheet" href="css/glass.css">
+ </head>
+ <body>
+   <div id="bg" class="bg"></div>
+@@ -98,6 +99,7 @@
+   <script src="js/dom.js"></script>
+   <script src="js/settings.js"></script>
+   <script src="js/clock.js"></script>
++  <script src="js/theme.js"></script>
+   <script src="js/logos.js"></script>
+   <script src="js/backgrounds.js"></script>
+   <script src="js/weather.js"></script>
+diff --git a/launcher/js/config.js b/launcher/js/config.js
+index 631ce08..17c0eb8 100644
+--- a/launcher/js/config.js
++++ b/launcher/js/config.js
+@@ -38,6 +38,10 @@ AeroTizen.config = {
+     homeCardMode: 'square',   // Square Samsung artwork remains the default.
+     homeCardColumns: null,    // null preserves the existing Big/Small column count.
+     background: 'aurora',
++    theme: 'glass',       // glass | frost | crystal | classic
++    accent: 'violet',     // see A.theme.ACCENTS
++    heroTitle: true,      // app name under the focused tile (TV layout)
++    layoutVersion: 0,     // 2 once the TV layout defaults were applied
+     weatherPhoto: false,  // Opt-in AI-generated scenes using the existing forecast.
+     speed: 1,
+     showWeather: true,
+diff --git a/launcher/js/main.js b/launcher/js/main.js
+index af7759e..5e644d6 100644
+--- a/launcher/js/main.js
++++ b/launcher/js/main.js
+@@ -45,6 +45,7 @@
+   var startup = window.AeroStartup;
+   A.settings.load();
+   startup.mark('settings-loaded');
++  A.theme.start();
+   A.applyBackground();
+   A.clock.start();
+   if (A.photoWeather) { A.photoWeather.start(); }
+diff --git a/launcher/js/settings.js b/launcher/js/settings.js
+index 024b9d4..309c908 100644
+--- a/launcher/js/settings.js
++++ b/launcher/js/settings.js
+@@ -60,6 +60,17 @@
+       if (saved.favorites && !saved.home) { saved.home = saved.favorites; }  // earlier field name
+       Object.keys(data).forEach(function (k) { if (saved[k] !== undefined) { data[k] = saved[k]; } });
+     } catch (e) { /* corrupt or unavailable storage: keep defaults */ }
++    if (['glass', 'frost', 'crystal', 'classic'].indexOf(data.theme) < 0) { data.theme = cfg.DEFAULTS.theme; }
++    // Once, when the TV layout arrives: one row of six banners, and a still wallpaper, since the
++    // halo supplies the colour and moving wallpapers make the TV lag. Settings stays in charge after.
++    if (data.theme !== 'classic' && !(data.layoutVersion >= 2)) {
++      var moving = window.Backgrounds && window.Backgrounds.list.some(function (b) { return b.id === data.background && b.anim; });
++      data.homeCardMode = 'rectangle';
++      data.homeCardColumns = 6;
++      if (moving) { data.background = 'black'; }
++      data.layoutVersion = 2;
++    }
++    data.heroTitle = data.heroTitle !== false;
+     data.continueWatching = data.continueWatching === true;
+     data.continueWatchingApps = Array.isArray(data.continueWatchingApps) ? data.continueWatchingApps.filter(function (id, index, all) {
+       return typeof id === 'string' && /^[A-Za-z0-9_.-]{1,200}$/.test(id) && all.indexOf(id) === index;
+diff --git a/launcher/js/theme.js b/launcher/js/theme.js
+new file mode 100644
+index 0000000..89f8d47
+--- /dev/null
++++ b/launcher/js/theme.js
+@@ -0,0 +1,47 @@
++// Appearance: glass themes and accent colour.
++// Everything is a body class or CSS variable, so css/glass.css owns the look.
++// No backdrop-filter: over the animated wallpaper the TV would re-blur every frame.
++(function (A) {
++  'use strict';
++
++  var THEMES = [
++    { id: 'glass', name: 'Glass', hint: 'Dark frosted panels' },
++    { id: 'frost', name: 'Frost', hint: 'Bright, milky glass' },
++    { id: 'crystal', name: 'Crystal', hint: 'Glass tinted with your accent' },
++    { id: 'classic', name: 'Classic', hint: 'The original flat look' }
++  ];
++  var ACCENTS = [
++    { id: 'violet', name: 'Violet', hex: '#7c5cff', rgb: '124,92,255' },
++    { id: 'blue', name: 'Blue', hex: '#3d8bff', rgb: '61,139,255' },
++    { id: 'teal', name: 'Teal', hex: '#20c9b0', rgb: '32,201,176' },
++    { id: 'green', name: 'Green', hex: '#4ad26e', rgb: '74,210,110' },
++    { id: 'amber', name: 'Amber', hex: '#ffb02e', rgb: '255,176,46' },
++    { id: 'rose', name: 'Rose', hex: '#ff5c8c', rgb: '255,92,140' },
++    { id: 'red', name: 'Red', hex: '#ff5448', rgb: '255,84,72' }
++  ];
++  function find(list, id) {
++    for (var i = 0; i < list.length; i++) { if (list[i].id === id) { return list[i]; } }
++    return list[0];
++  }
++
++  function apply() {
++    var s = A.settings, theme = find(THEMES, s.theme), accent = find(ACCENTS, s.accent);
++    var body = document.body, root = document.documentElement;
++    THEMES.forEach(function (t) { body.classList.toggle('theme-' + t.id, t.id === theme.id); });
++    // glass-ui predates the themes and still styles the header plates.
++    body.classList.toggle('glass-ui', theme.id !== 'classic');
++    body.classList.toggle('no-hero', s.heroTitle === false);
++    root.style.setProperty('--focus', accent.hex);
++    root.style.setProperty('--accent-rgb', accent.rgb);
++  }
++
++  A.theme = {
++    THEMES: THEMES,
++    ACCENTS: ACCENTS,
++    apply: apply,
++    start: function () {
++      apply();
++      A.settings.subscribe(apply);
++    }
++  };
++})(window.AeroTizen);
+diff --git a/launcher/src/home/Home.tsx b/launcher/src/home/Home.tsx
+index 69687f4..ef5bc44 100644
+--- a/launcher/src/home/Home.tsx
++++ b/launcher/src/home/Home.tsx
+@@ -8,12 +8,39 @@ import { AppCard } from './components/AppCard';
+ import { ContinueCard } from './components/ContinueCard';
+ import { MoveArrows } from './components/MoveArrows';
+ import { TileMenu } from './components/TileMenu';
++import { Halo } from './components/Halo';
++
++// Halo colour for a brand: the first colour of its background, or its logo colour when the
++// background is near white (YouTube), since a white halo would wash the screen out.
++const haloColour = (background: string, logo: string) => {
++  const colour = background.match(/#[0-9a-f]{3,8}\b|(?:rgb|hsl)a?\([^)]*\)/i)?.[0];
++  const hex = colour && /^#[0-9a-f]{6}$/i.test(colour) ? colour : null;
++  if (hex) {
++    const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
++    if (0.299 * r + 0.587 * g + 0.114 * b > 200) { return logo; }
++  }
++  return colour || logo;
++};
+ export const Home = ({ env }: { env: HomeEnvironment }) => {
+-  const settings = useStore(env.settings), { page, active, draft, moving } = useStore(env.state);
++  const settings = useStore(env.settings), { page, active, draft, moving, selected } = useStore(env.state);
+   const { apps, inputs, items, ready } = useStore(env.inventory);
+   const home = draft || (settings.home.length || env.runtime.settings.home !== null ? settings.home : [env.runtime.config.FIREPLACE_ID]);
+   const visibleHome = home.filter(id => id === env.runtime.config.FIREPLACE_ID || !ready || apps.some(app => app.id === id));
+   const size = settings.cardSize === 'small' ? 'small' : 'big';
++  // The glass themes use the TV layout: clock above, apps along the bottom, halo behind focus.
++  const tv = settings.theme !== 'classic';
++  const columns = env.columns(settings);
++  const glow = (() => {
++    const accent = { colour: 'rgb(124,92,255)', x: 560 };
++    if (!tv || !selected.startsWith('app:')) { return accent; }
++    const id = selected.slice(4), list = page === 'home' ? visibleHome : apps.map(app => app.id);
++    const column = Math.max(0, list.indexOf(id)) % columns;
++    // Tile centre: the row starts at 64px and spans 1792px.
++    const x = 64 + (column + 0.5) * (1792 / columns);
++    if (id === env.runtime.config.FIREPLACE_ID) { return { colour: '#ff6a10', x }; }
++    const app = apps.find(item => item.id === id), brand = app && env.describe(app);
++    return { colour: brand ? haloColour(brand.background, brand.logoColour) : accent.colour, x };
++  })();
+   useLayoutEffect(() => { env.bridge.focus(); }, [env, page, apps, inputs, items, settings.home, draft, size]);
+   useLayoutEffect(() => {
+     const list = document.getElementById('continue-items');
+@@ -29,7 +56,8 @@ export const Home = ({ env }: { env: HomeEnvironment }) => {
+     return <AppCard key={id} env={env} app={app} active={active && shown} />;
+   });
+   return <>
+-    <header class="topbar" aria-hidden={!active}><div class="topbar-left"><HeaderPlate env={env} />
++    {tv ? <Halo colour={glow.colour} x={glow.x} /> : null}
++    <header class={'topbar page-' + page} aria-hidden={!active}><div class="topbar-left"><HeaderPlate env={env} />
+       <HomeControl env={env} id="gear" controlKey="gear" className="icon-btn" preserveSelection title={env.translate('Settings')}>
+         <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.9a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.9a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5A3.5 3.5 0 1 1 13 8.5a3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)" /></svg>
+       </HomeControl>
+@@ -40,7 +68,7 @@ export const Home = ({ env }: { env: HomeEnvironment }) => {
+       <HomeControl env={env} id="home-tab" controlKey="home-tab" className={'view-tab' + (page === 'home' ? ' active' : '')} title={env.translate('Home')} pressed={page === 'home'}>{env.translate('Home')}</HomeControl>
+       <HomeControl env={env} id="apps-tab" controlKey="apps-tab" className={'view-tab' + (page === 'apps' ? ' active' : '')} title={env.translate('All apps')} pressed={page === 'apps'}>{env.translate('All apps')}</HomeControl>
+     </nav><div class="topbar-right"><div id="custom-clock-root" /><span id="weather" class="weather" hidden /><span id="date" class="date" /><span id="time" class="time" /></div></header>
+-    <div class="content-viewport" aria-hidden={!active}><div class="content-mask"><main id="rows" ref={env.rows}><div class="home-page-surface" data-page={page}>
++    <div class={'content-viewport' + (tv ? ' tv-layout page-' + page : '')} aria-hidden={!active}><div class="content-mask"><main id="rows" ref={env.rows}><div class="home-page-surface" data-page={page}>
+       <div style={{ display: page === 'home' ? undefined : 'none' }} hidden={page !== 'home'} id={page === 'home' ? 'grid' : 'home-grid-parked'} class={'app-grid cards-' + size + ' cards-' + settings.homeCardMode + ' cols-' + env.columns(settings)} aria-label="Home apps">{cards(visibleHome, page === 'home')}</div>
+       <div style={{ display: page === 'apps' ? undefined : 'none' }} hidden={page !== 'apps'} id={page === 'apps' ? 'grid' : 'apps-grid-parked'} class={'app-grid cards-' + size + ' cards-' + settings.homeCardMode + ' cols-' + env.columns(settings)} aria-label="All apps">{cards(apps.map(app => app.id), page === 'apps')}</div>
+       <p id="apps-empty" class="apps-empty" hidden={page === 'home' || apps.length > 0}>{env.translate('No apps found.')}</p>
+diff --git a/launcher/src/home/components/AppCard.tsx b/launcher/src/home/components/AppCard.tsx
+index a6b31ac..b53553f 100644
+--- a/launcher/src/home/components/AppCard.tsx
++++ b/launcher/src/home/components/AppCard.tsx
+@@ -6,7 +6,13 @@ import { HomeControl } from './HomeControl';
+ import type { HomeEnvironment } from '../types';
+ import type { InstalledApp } from '../../settings/types';
+ export const AppCard = ({ env, app, active }: { env: HomeEnvironment; app: InstalledApp; active: boolean }) => {
+-  const brand = useMemo(() => env.describe(app), [env, app]);
++  // Samsung artwork is square and leaves dark bars in a wide card, so wide cards use the banner:
++  // the brand logo, or the app icon beside its name.
++  const rectangle = useStore(env.settings).homeCardMode === 'rectangle';
++  const brand = useMemo(() => {
++    const described = env.describe(app);
++    return rectangle ? { ...described, artwork: [] } : described;
++  }, [env, app, rectangle]);
+   const state = useStore(env.state), moving = state.moving === app.id;
+   return <HomeControl env={env} controlKey={'app:' + app.id} dataId={app.id} registered={active} className={'tile app-tile' + (moving ? ' moving' : '')}
+     title={brand.title} style={{ background: brand.background }}>
+diff --git a/launcher/src/home/components/Halo.tsx b/launcher/src/home/components/Halo.tsx
+new file mode 100644
+index 0000000..10991e9
+--- /dev/null
++++ b/launcher/src/home/components/Halo.tsx
+@@ -0,0 +1,22 @@
++import { useLayoutEffect, useState } from 'preact/hooks';
++
++interface Glow { colour: string; x: number }
++
++// Background halo in the focused app's colour. Two half-size layers cross-fade with opacity
++// only, so a focus change paints one small gradient and the TV composites the rest.
++export const Halo = ({ colour, x }: Glow) => {
++  const [layers, setLayers] = useState<{ glows: [Glow, Glow]; front: 0 | 1 }>({ glows: [{ colour, x }, { colour, x }], front: 0 });
++  useLayoutEffect(() => {
++    setLayers(current => {
++      const shown = current.glows[current.front];
++      if (shown.colour === colour && shown.x === x) { return current; }
++      const back = current.front === 0 ? 1 : 0, glows: [Glow, Glow] = [...current.glows];
++      glows[back] = { colour, x };
++      return { glows, front: back };
++    });
++  }, [colour, x]);
++  return <div class="halo" aria-hidden="true">
++    {layers.glows.map((glow, i) => <i key={i} class={'halo-layer' + (layers.front === i ? ' on' : '')}
++      style={{ backgroundImage: 'radial-gradient(ellipse 560px 380px at ' + Math.round(glow.x / 2) + 'px 330px, ' + glow.colour + ' 0%, transparent 100%)' }} />)}
++  </div>;
++};
+diff --git a/launcher/src/home/index.tsx b/launcher/src/home/index.tsx
+index de2844a..e7a7f5e 100644
+--- a/launcher/src/home/index.tsx
++++ b/launcher/src/home/index.tsx
+@@ -15,7 +15,7 @@ const rows = createRef<HTMLElement>();
+ const environment = createHomeController({ runtime, settings, inventory, rows, nodes: new Map(),
+   translate: value => runtime.i18n?.t(value) || value,
+   describe: app => runtime.tiles.describe(app),
+-  columns: values => [3,4,5].includes(Number(values.homeCardColumns)) ? Number(values.homeCardColumns) : runtime.config.CARD_COLUMNS[values.cardSize === 'small' ? 'small' : 'big']
++  columns: values => [3,4,5,6].includes(Number(values.homeCardColumns)) ? Number(values.homeCardColumns) : runtime.config.CARD_COLUMNS[values.cardSize === 'small' ? 'small' : 'big']
+ }, flushSync);
+ const refresh = () => flushSync(() => {
+   const inputs = runtime.inputs.sources.filter(source => runtime.inputs.isVisible ? runtime.inputs.isVisible(source) :
+diff --git a/launcher/src/home/state/createHomeController.ts b/launcher/src/home/state/createHomeController.ts
+index 1ea78d2..f386d0a 100644
+--- a/launcher/src/home/state/createHomeController.ts
++++ b/launcher/src/home/state/createHomeController.ts
+@@ -25,7 +25,11 @@ export const createHomeController = (env: Omit<HomeEnvironment, 'bridge' | 'stat
+   const ids = () => state.getSnapshot().page === 'home' ? homeIds().filter(id => id === A.config.FIREPLACE_ID || !inventory.getSnapshot().ready || A.apps.byId(id)) : inventory.getSnapshot().apps.map(app => app.id);
+   const sourceKey = (source: { type: string; number?: number }) => 'input:' + source.type + ':' + source.number;
+   const rows = (): string[][] => {
+-    const columns = env.columns(settings.getSnapshot()), all = ids(), result = [['gear', 'samsung-home-shortcut', 'home-tab', 'apps-tab']];
++    const columns = env.columns(settings.getSnapshot()), all = ids();
++    // The glass themes draw the buttons right of the tabs, so the arrow order follows the screen.
++    const header = settings.getSnapshot().theme === 'classic'
++      ? ['gear', 'samsung-home-shortcut', 'home-tab', 'apps-tab'] : ['home-tab', 'apps-tab', 'gear', 'samsung-home-shortcut'];
++    const result = [header];
+     for (let i = 0; i < all.length; i += columns) {result.push(all.slice(i, i + columns).map(id => 'app:' + id));}
+     if (state.getSnapshot().page === 'home') {
+       if (settings.getSnapshot().continueWatching && inventory.getSnapshot().items.length) {result.push(inventory.getSnapshot().items.map(item => 'continue:' + item.key));}
+@@ -62,10 +66,16 @@ export const createHomeController = (env: Omit<HomeEnvironment, 'bridge' | 'stat
+     const rect = node.getBoundingClientRect(), top = main.getBoundingClientRect().top;
+     const origin = main.parentElement?.getBoundingClientRect().top || 0;
+     const y = rect.top - top + origin, bottom = rect.bottom - top + origin;
++    // The TV layout's viewport sits low and has no top fade, so it keeps a smaller margin and
++    // leaves room under each row for the focused app's name.
++    const tvLayout = main.closest('.content-viewport')?.classList.contains('tv-layout');
++    const limit = tvLayout ? 1080 - 70 : 1000, margin = tvLayout ? 24 : 128;
+     if (list[0].includes(selected) || list[1]?.includes(selected)) {scroll = 0;}
+-    else if (bottom - scroll > 1000) {scroll = bottom - 1000;}
+-    else if (y - scroll < origin + 128) {scroll = Math.max(0, y - origin - 128);}
++    else if (bottom - scroll > limit) {scroll = bottom - limit;}
++    else if (y - scroll < origin + margin) {scroll = Math.max(0, y - origin - margin);}
+     main.closest('.content-viewport')?.classList.toggle('is-scrolled', scroll > 0);
++    // The TV layout fades the big clock out while the rows scroll up over it.
++    document.getElementById('home-root')?.classList.toggle('home-scrolled', scroll > 0);
+     main.style.transform = 'translate3d(0,' + (-scroll) + 'px,0)';
+   };
+   const select = (selected: string) => {
+@@ -168,7 +178,11 @@ export const createHomeController = (env: Omit<HomeEnvironment, 'bridge' | 'stat
+       }
+       row = target;
+     }
+-    select(all[row][Math.max(0, Math.min(all[row].length - 1, column))]);
++    const next = all[row][Math.max(0, Math.min(all[row].length - 1, column))];
++    // Like a TV tab bar, the Home / All apps tabs switch page on focus, not on OK.
++    const page = next === 'home-tab' ? 'home' : next === 'apps-tab' ? 'apps' : null;
++    if (page && page !== current.page) { showPage(page); return; }
++    select(next);
+   });
+   const keyup = (code: number) => {
+     if (code !== K.ENTER) {return;}
+diff --git a/launcher/src/settings/Settings.tsx b/launcher/src/settings/Settings.tsx
+index 565610f..43fcccc 100644
+--- a/launcher/src/settings/Settings.tsx
++++ b/launcher/src/settings/Settings.tsx
+@@ -1,22 +1,31 @@
+ import { RemoteControl } from './components/RemoteControl';
+-import { useMemo } from 'preact/hooks';
++import { useEffect, useMemo, useState } from 'preact/hooks';
+ import { useStore } from '../shared/hooks/useStore';
+ import { BackgroundSettings } from './sections/BackgroundSettings';
+ import { WeatherSettings } from './sections/weather/WeatherSettings';
+ import { ContinueWatchingSettings } from './sections/ContinueWatchingSettings';
+-import { DisplaySettings } from './sections/DisplaySettings';
++import { ClockSettings } from './sections/DisplaySettings';
++import { CardSettings } from './sections/CardSettings';
++import { ThemeSettings } from './sections/ThemeSettings';
+ import { InputSettings } from './sections/inputs/InputSettings';
+ import { AppMenu } from './sections/apps/AppMenu';
+ import { useSettingsEnvironment } from './hooks/useSettingsEnvironment';
+ import { useSettingsNavigation } from './hooks/useSettingsNavigation';
+ 
++const SECTIONS = [
++  ['appearance', 'Appearance'], ['apps', 'Apps & Home'], ['clock', 'Clock & Weather'], ['inputs', 'Inputs']
++] as const;
++type SectionId = typeof SECTIONS[number][0];
++
+ export const Settings = ({ active, previewing, openedAt }: { active: boolean; previewing: boolean; openedAt: number }) => {
+   const { settings: store, inventory, services, actions } = useSettingsEnvironment();
+   const settings = useStore(store);
+   const { apps, inputs, continueSources, continueMessage } = useStore(inventory);
+   const animated = services.backgrounds.some(background => background.id === settings.background && Boolean(background.anim));
+   const locationLabel = settings.weatherLocation?.label || settings.weatherLocation?.name;
+-  useSettingsNavigation(active, previewing, { apps, inputs, continueSources, continueMessage, continueEnabled: settings.continueWatching, animated, locationLabel });
++  const [section, setSection] = useState<SectionId>('appearance');
++  useEffect(() => { if (!active) { setSection('appearance'); } }, [active]);
++  useSettingsNavigation(active, previewing, { apps, inputs, continueSources, continueMessage, continueEnabled: settings.continueWatching, animated, locationLabel, section });
+   const appMenu = useMemo(() => (
+     <AppMenu home={settings.home} apps={apps} actions={actions} active={active}
+       describeApp={services.describeApp} fireplaceId={services.config.FIREPLACE_ID} />
+@@ -24,12 +33,32 @@ export const Settings = ({ active, previewing, openedAt }: { active: boolean; pr
+   return (
+     <>
+       <h2>Settings</h2>
+-      <BackgroundSettings settings={settings} actions={actions} config={services.config} backgrounds={services.backgrounds} />
+-      <WeatherSettings settings={settings} actions={actions} active={active} />
+-      <DisplaySettings settings={settings} actions={actions} clock={services.clock} openedAt={openedAt} />
+-      <ContinueWatchingSettings settings={settings} actions={actions} sources={continueSources} message={continueMessage} active={active} describeApp={services.describeApp} />
+-      <InputSettings settings={settings} actions={actions} inputs={inputs} />
+-      {appMenu}
++      <nav id="settings-sections" class="section-tabs" aria-label="Settings sections">
++        {SECTIONS.map(([id, label]) => (
++          <RemoteControl key={id} class={'section-tab' + (section === id ? ' on' : '')} focusKey={'section:' + id}
++            role="button" aria-pressed={section === id} onClick={() => setSection(id)}>{label}</RemoteControl>
++        ))}
++      </nav>
++      {/* Every section stays mounted so drafts, artwork and focus nodes survive tab changes;
++          navigation skips the hidden ones. */}
++      <div class="section-body" data-section={section}>
++        <div class="settings-section" hidden={section !== 'appearance'}>
++          <ThemeSettings settings={settings} actions={actions} appearance={services.appearance} />
++          <BackgroundSettings settings={settings} actions={actions} config={services.config} backgrounds={services.backgrounds} />
++          <CardSettings settings={settings} actions={actions} />
++        </div>
++        <div class="settings-section" hidden={section !== 'apps'}>
++          {appMenu}
++          <ContinueWatchingSettings settings={settings} actions={actions} sources={continueSources} message={continueMessage} active={active} describeApp={services.describeApp} />
++        </div>
++        <div class="settings-section" hidden={section !== 'clock'}>
++          <ClockSettings settings={settings} actions={actions} clock={services.clock} openedAt={openedAt} />
++          <WeatherSettings settings={settings} actions={actions} active={active} />
++        </div>
++        <div class="settings-section" hidden={section !== 'inputs'}>
++          <InputSettings settings={settings} actions={actions} inputs={inputs} />
++        </div>
++      </div>
+       <RemoteControl id="escape" class="escape" focusKey="escape" role="button" onClick={actions.useSamsungHome}>
+         Use Samsung Home instead
+       </RemoteControl>
+diff --git a/launcher/src/settings/hooks/useSettingsNavigation.ts b/launcher/src/settings/hooks/useSettingsNavigation.ts
+index f2bf35e..a72e44f 100644
+--- a/launcher/src/settings/hooks/useSettingsNavigation.ts
++++ b/launcher/src/settings/hooks/useSettingsNavigation.ts
+@@ -3,18 +3,18 @@ import { flushSync } from 'preact/compat';
+ import { useSettingsEnvironment } from './useSettingsEnvironment';
+ import type { SettingsInventorySnapshot } from '../types';
+ 
+-interface Layout extends SettingsInventorySnapshot { continueEnabled: boolean; animated: boolean; locationLabel?: string }
++interface Layout extends SettingsInventorySnapshot { continueEnabled: boolean; animated: boolean; locationLabel?: string; section?: string }
+ const SPACE_KEY = 32;
+ 
+-export const useSettingsNavigation = (active: boolean, previewing: boolean, { apps, inputs, continueSources, continueMessage, continueEnabled, animated, locationLabel }: Layout) => {
+-  const { navigation, bridge, services, actions, settings, view, root } = useSettingsEnvironment();
++export const useSettingsNavigation = (active: boolean, previewing: boolean, { apps, inputs, continueSources, continueMessage, continueEnabled, animated, locationLabel, section }: Layout) => {
++  const { navigation, bridge, services, actions, view, root } = useSettingsEnvironment();
+   const wasOpen = useRef(false);
+   useLayoutEffect(() => {
+     navigation.invalidate();
+-    if (active && !wasOpen.current) { navigation.reset('bg:' + settings.getSnapshot().background); }
++    if (active && !wasOpen.current) { navigation.reset('section:appearance'); }
+     wasOpen.current = active;
+     if (active && !previewing) { navigation.focus(); } else { navigation.clear(); }
+-  }, [active, previewing, apps, inputs, continueSources, continueMessage, continueEnabled, animated, locationLabel, navigation, settings]);
++  }, [active, previewing, apps, inputs, continueSources, continueMessage, continueEnabled, animated, locationLabel, section, navigation]);
+   useLayoutEffect(() => {
+     if (!active) { return; }
+     const resize = () => {
+diff --git a/launcher/src/settings/sections/CardSettings.tsx b/launcher/src/settings/sections/CardSettings.tsx
+new file mode 100644
+index 0000000..298ea5a
+--- /dev/null
++++ b/launcher/src/settings/sections/CardSettings.tsx
+@@ -0,0 +1,15 @@
++import { Choice } from '../components/Choice';
++import type { SettingsSectionProps } from '../types';
++
++export const CardSettings = ({ settings, actions }: SettingsSectionProps) => (
++  <>
++    <h3>App cards</h3>
++    <Choice id="home-card-mode" label="Home tile layout" value={settings.homeCardMode}
++      options={[['square', 'Square'], ['rectangle', 'Rectangle']]} onSelect={actions.setHomeCardMode} />
++    <Choice id="home-card-columns" label="Apps per row" value={String(settings.homeCardColumns || 'auto')}
++      options={[['auto', 'Follow card size'], ['3', '3'], ['4', '4'], ['5', '5'], ['6', '6']]}
++      onSelect={value => actions.setHomeCardColumns(value === 'auto' ? null : Number(value))} />
++    {!settings.homeCardColumns ? <Choice id="card-sizes" label="App card size" value={settings.cardSize || 'big'}
++      options={[["big", "Big"], ["small", "Small"]]} onSelect={actions.setCardSize} /> : null}
++  </>
++);
+diff --git a/launcher/src/settings/sections/DisplaySettings.tsx b/launcher/src/settings/sections/DisplaySettings.tsx
+index 617e4ce..0fa6ec7 100644
+--- a/launcher/src/settings/sections/DisplaySettings.tsx
++++ b/launcher/src/settings/sections/DisplaySettings.tsx
+@@ -4,7 +4,7 @@ import type { Clock, SettingsSectionProps } from '../types';
+ 
+ interface Props extends SettingsSectionProps { clock: Omit<Clock, 'tick'>; openedAt: number }
+ 
+-export const DisplaySettings = ({ settings, actions, clock, openedAt }: Props) => {
++export const ClockSettings = ({ settings, actions, clock, openedAt }: Props) => {
+   const now = new Date(openedAt);
+   const dateStyle = clock.dateStyle(settings.dateFormat);
+   return (
+@@ -28,18 +28,6 @@ export const DisplaySettings = ({ settings, actions, clock, openedAt }: Props) =
+       <h3>Network indicator</h3>
+       <Choice id="network-visibility" label="Network indicator visibility" value={settings.showNetwork !== false}
+         options={[[true, 'Show'], [false, 'Hide']]} onSelect={actions.setNetworkVisible} />
+-      <h3>Live TV</h3>
+-      <p class="hint">Show the Live TV tile in Inputs.</p>
+-      <Choice id="live-tv-visibility" label="Live TV visibility" value={settings.showLiveTv}
+-        options={[[true, 'Show'], [false, 'Hide']]} onSelect={actions.setLiveTvVisible} />
+-      <h3>App cards</h3>
+-      <Choice id="home-card-mode" label="Home tile layout" value={settings.homeCardMode}
+-        options={[['square', 'Square'], ['rectangle', 'Rectangle']]} onSelect={actions.setHomeCardMode} />
+-      <Choice id="home-card-columns" label="Apps per row" value={String(settings.homeCardColumns || 'auto')}
+-        options={[['auto', 'Follow card size'], ['3', '3'], ['4', '4'], ['5', '5']]}
+-        onSelect={value => actions.setHomeCardColumns(value === 'auto' ? null : Number(value))} />
+-      {!settings.homeCardColumns ? <Choice id="card-sizes" label="App card size" value={settings.cardSize || 'big'}
+-        options={[["big", "Big"], ["small", "Small"]]} onSelect={actions.setCardSize} /> : null}
+     </>
+   );
+ };
+diff --git a/launcher/src/settings/sections/ThemeSettings.tsx b/launcher/src/settings/sections/ThemeSettings.tsx
+new file mode 100644
+index 0000000..51be539
+--- /dev/null
++++ b/launcher/src/settings/sections/ThemeSettings.tsx
+@@ -0,0 +1,34 @@
++import { Choice } from '../components/Choice';
++import { RemoteControl } from '../components/RemoteControl';
++import type { SettingsServices, SettingsSectionProps } from '../types';
++
++interface Props extends SettingsSectionProps { appearance: SettingsServices['appearance'] }
++
++export const ThemeSettings = ({ settings, actions, appearance }: Props) => (
++  <>
++    <h3>Theme</h3>
++    <div id="themes" class="theme-cards">
++      {appearance.themes.map(theme => (
++        <RemoteControl key={theme.id} class={'theme-card theme-card-' + theme.id + (settings.theme === theme.id ? ' on' : '')}
++          focusKey={'theme:' + theme.id} role="button" aria-pressed={settings.theme === theme.id}
++          onClick={() => actions.setTheme(theme.id)}>
++          <div class="theme-preview"><i /><i /><i /></div>
++          <b>{theme.name}</b><span>{theme.hint}</span>
++        </RemoteControl>
++      ))}
++    </div>
++    <h3>Accent colour</h3>
++    <div id="accents" class="accents">
++      {appearance.accents.map(accent => (
++        <RemoteControl key={accent.id} class={'accent-dot' + (settings.accent === accent.id ? ' on' : '')}
++          focusKey={'accent:' + accent.id} role="button" aria-pressed={settings.accent === accent.id} aria-label={accent.name}
++          style={{ background: accent.hex }} onClick={() => actions.setAccent(accent.id)}>
++          <span>{accent.name}</span>
++        </RemoteControl>
++      ))}
++    </div>
++    <h3>App name under the focused app</h3>
++    <Choice id="hero-title" label="App name under the focused app" value={settings.heroTitle !== false}
++      options={[[true, 'Show'], [false, 'Hide']]} onSelect={actions.setHeroTitle} />
++  </>
++);
+diff --git a/launcher/src/settings/sections/inputs/InputSettings.tsx b/launcher/src/settings/sections/inputs/InputSettings.tsx
+index 08e3fdb..865050d 100644
+--- a/launcher/src/settings/sections/inputs/InputSettings.tsx
++++ b/launcher/src/settings/sections/inputs/InputSettings.tsx
+@@ -6,6 +6,10 @@ interface Props extends SettingsSectionProps { inputs: readonly InputOption[] }
+ 
+ export const InputSettings = ({ settings, actions, inputs }: Props) => (
+   <>
++    <h3>Live TV</h3>
++    <p class="hint">Show the Live TV tile in Inputs.</p>
++    <Choice id="live-tv-visibility" label="Live TV visibility" value={settings.showLiveTv}
++      options={[[true, 'Show'], [false, 'Hide']]} onSelect={actions.setLiveTvVisible} />
+     <h3>HDMI ports</h3>
+     <p class="hint">Choose whether to show HDMI ports that the TV reports as disconnected.</p>
+     <Choice id="input-visibility" label="HDMI visibility" value={settings.hideDisconnectedHdmi}
+diff --git a/launcher/src/settings/services/createSettingsServices.ts b/launcher/src/settings/services/createSettingsServices.ts
+index b11334d..a15d63a 100644
+--- a/launcher/src/settings/services/createSettingsServices.ts
++++ b/launcher/src/settings/services/createSettingsServices.ts
+@@ -11,6 +11,7 @@ export const createSettingsServices = (runtime: LauncherRuntime): SettingsServic
+     DATE_FORMATS: runtime.clock.DATE_FORMATS
+   },
+   backgrounds: window.Backgrounds.list.map(background => ({ ...background, preview: window.Backgrounds.preview(background) })),
++  appearance: { themes: runtime.theme.THEMES, accents: runtime.theme.ACCENTS },
+   describeApp: app => runtime.tiles.describe(app),
+   searchLocations(query, done) {
+     let cancelled = false;
+diff --git a/launcher/src/settings/services/launcherRuntime.ts b/launcher/src/settings/services/launcherRuntime.ts
+index 106b19d..06d7fb5 100644
+--- a/launcher/src/settings/services/launcherRuntime.ts
++++ b/launcher/src/settings/services/launcherRuntime.ts
+@@ -1,4 +1,4 @@
+-import type { ContinueSource, AppPresentation, Background, Clock, InstalledApp, LauncherConfig, SettingsBridge, SettingsSource, WeatherLocation } from '../types';
++import type { AccentOption, ThemeOption, ContinueSource, AppPresentation, Background, Clock, InstalledApp, LauncherConfig, SettingsBridge, SettingsSource, WeatherLocation } from '../types';
+ 
+ export interface InputSource { type: string; number?: number; editName?: string }
+ 
+@@ -13,6 +13,7 @@ export interface LauncherRuntime {
+   apps: { all: InstalledApp[]; openStore(): void; subscribe(listener: () => void): () => void };
+   homewatch: { useSamsungHome(): void; openSamsungHome?(): void };
+   tiles: { describe(app: InstalledApp): AppPresentation };
++  theme: { THEMES: ThemeOption[]; ACCENTS: AccentOption[] };
+   settingsUi: SettingsBridge;
+   clearFocus(): void; toast(message: string): void; hideToast(): void; applyBackground(): void;
+ }
+diff --git a/launcher/src/settings/state/createSettingsActions.ts b/launcher/src/settings/state/createSettingsActions.ts
+index 85fc7e3..7033581 100644
+--- a/launcher/src/settings/state/createSettingsActions.ts
++++ b/launcher/src/settings/state/createSettingsActions.ts
+@@ -15,6 +15,10 @@ export const createSettingsActions = (
+       services.applyWeatherVisibility();
+       services.applyBackground();
+     }),
++    // Saving notifies the theme module, which restyles the page.
++    setTheme: theme => commit({ theme }),
++    setAccent: accent => commit({ accent }),
++    setHeroTitle: heroTitle => commit({ heroTitle }),
+     setContinueWatching: continueWatching => commit({ continueWatching }),
+     toggleContinueApp(id) {
+       const selected = settings.getSnapshot().continueWatchingApps;
+diff --git a/launcher/src/settings/types.ts b/launcher/src/settings/types.ts
+index 84ea382..57a48db 100644
+--- a/launcher/src/settings/types.ts
++++ b/launcher/src/settings/types.ts
+@@ -5,12 +5,16 @@ import type { Navigation } from '../shared/navigation/createNavigation';
+ export type TimeFormat = '12' | '24';
+ export type TemperatureUnit = 'C' | 'F';
+ export type CardSize = 'big' | 'small';
++export type ThemeId = 'glass' | 'frost' | 'crystal' | 'classic';
++export interface ThemeOption { id: ThemeId; name: string; hint: string }
++export interface AccentOption { id: string; name: string; hex: string; rgb: string }
+ export type DateFormat = 'compact' | 'short' | 'long' | 'numeric-short' | 'numeric' | 'iso' | 'none';
+ export interface WeatherLocation {
+   name: string; label?: string; latitude: number; longitude: number; country_code?: string;
+ }
+ export interface SettingsValues {
+   home: string[]; homeCardMode: 'square' | 'rectangle'; homeCardColumns: number | null; cardSize: CardSize; background: string; speed: number;
++  theme: ThemeId; accent: string; heroTitle: boolean; layoutVersion: number;
+   weatherPhoto: boolean; showWeather: boolean; showTime: boolean; showNetwork: boolean; tempUnit: TemperatureUnit;
+   weatherLocation: WeatherLocation | null; weatherShowLocation: boolean;
+   dateFormat: DateFormat | 'auto' | 'weekday' | 'dmy' | 'mdy'; timeFormat: TimeFormat;
+@@ -67,6 +71,7 @@ export interface SettingsServices {
+   config: LauncherConfig;
+   clock: Omit<Clock, 'tick'>;
+   backgrounds: readonly BackgroundOption[];
++  appearance: { themes: readonly ThemeOption[]; accents: readonly AccentOption[] };
+   describeApp(app: InstalledApp): AppPresentation;
+   searchLocations(query: string, done: (results: WeatherLocation[] | null) => void): () => void;
+   applyBackground(): void; applySpeed(speed: number): void; applyClock(): void;
+@@ -77,6 +82,7 @@ export interface SettingsServices {
+ }
+ export interface SettingsActions {
+   setWeatherPhoto(enabled: boolean): void;
++  setTheme(theme: ThemeId): void; setAccent(accent: string): void; setHeroTitle(visible: boolean): void;
+   setContinueWatching(enabled: boolean): void; toggleContinueApp(id: string): void;
+   setBackground(background: string): void; setWeatherVisible(visible: boolean): void;
+   setLocationVisible(visible: boolean): void; setTempUnit(unit: TemperatureUnit): void;
+diff --git a/tests/browser/card_layouts.spec.cjs b/tests/browser/card_layouts.spec.cjs
+index 2da56b4..f9c3e9a 100644
+--- a/tests/browser/card_layouts.spec.cjs
++++ b/tests/browser/card_layouts.spec.cjs
+@@ -27,3 +27,67 @@ for(const mode of ['square','rectangle'])for(const columns of [3,4,5]){
+   expect(errors).toEqual([]);
+  });
+ }
++
++// Samsung's square store icon inside a wide card left dark bars beside the logo.
++test('rectangle cards show the banner, never square Samsung artwork; square cards keep it',async({page})=>{
++  await page.route('https://**/*',r=>r.fulfill({body:'{}'}));
++  await page.route('http://127.0.0.1:47790/**',r=>r.fulfill({body:'{}'}));
++  await page.route('**/opt/share/**',r=>r.fulfill({contentType:'image/svg+xml',
++    body:'<svg xmlns="http://www.w3.org/2000/svg" width="304" height="304"><rect width="304" height="304" fill="navy"/></svg>'}));
++  await page.addInitScript(()=>{
++    const apps=[{id:'org.tizen.netflix-app',name:'Netflix',packageId:'org.tizen.netflix-app',iconPath:'/opt/share/webappservice/apps_icon/all/3201907018807/304x304.png'},
++      {id:'unknownpkg.App',name:'Unknown App',packageId:'unknownpkg',iconPath:'/opt/share/webappservice/apps_icon/all/3200000000001/304x304.png'}];
++    if(!localStorage.getItem('aerotizen.settings.v1'))localStorage.setItem('aerotizen.settings.v1',JSON.stringify({home:apps.map(a=>a.id),homeCardMode:'rectangle',homeCardColumns:4}));
++    window.tizen={application:{getAppsInfo:done=>done(apps),launch(){}},systeminfo:{getPropertyValue(n,d,f){f&&f();},addPropertyValueChangeListener(){}}};
++  });
++  await page.goto('/');await page.waitForFunction(()=>AeroTizen.apps.ready);
++  await expect(page.locator('#grid .app-tile .app-fallback').first()).toBeVisible();
++  await expect(page.locator('#grid .app-artwork')).toHaveCount(0);
++  await expect(page.locator('#grid [data-id="unknownpkg.App"] img.logo')).toBeVisible();
++  await page.evaluate(()=>{AeroTizen.settings.homeCardMode='square';AeroTizen.settings.homeCardColumns=null;AeroTizen.settings.save();});
++  await expect(page.locator('#grid .app-artwork').first()).toBeVisible();
++});
++
++test('Home and All apps switch when the remote moves focus onto them',async({page})=>{
++  await page.route('https://**/*',r=>r.fulfill({body:'{}'}));
++  await page.route('http://127.0.0.1:47790/**',r=>r.fulfill({body:'{}'}));
++  await page.goto('/');await page.waitForFunction(()=>AeroTizen.apps.ready&&document.querySelector('#grid > .tile.focused'));
++  const shown=()=>page.locator('.home-page-surface').getAttribute('data-page');
++  await page.keyboard.press('ArrowUp');
++  await expect(page.locator('#home-tab')).toHaveClass(/focused/);
++  await page.keyboard.press('ArrowRight');
++  await expect.poll(shown).toBe('apps');
++  await expect(page.locator('#apps-tab')).toHaveClass(/focused/);
++  await page.keyboard.press('ArrowLeft');
++  await expect.poll(shown).toBe('home');
++  await expect(page.locator('#home-tab')).toHaveClass(/focused/);
++  // The glass layout draws Settings and the other buttons right of the tabs; Right follows the screen.
++  await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowRight');
++  await expect(page.locator('#gear')).toHaveClass(/focused/);
++  await page.keyboard.press('ArrowLeft');
++  await expect(page.locator('#apps-tab')).toHaveClass(/focused/);
++});
++
++test('glass layout keeps the inputs below the screen until Down scrolls them in',async({page})=>{
++  await page.route('https://**/*',r=>r.fulfill({body:'{}'}));
++  await page.route('http://127.0.0.1:47790/**',r=>r.fulfill({body:'{}'}));
++  await page.addInitScript(()=>{
++    const apps=[{id:'org.tizen.netflix-app',name:'Netflix',packageId:'org.tizen.netflix-app'}];
++    if(!localStorage.getItem('aerotizen.settings.v1'))localStorage.setItem('aerotizen.settings.v1',JSON.stringify({home:apps.map(a=>a.id)}));
++    window.tizen={application:{getAppsInfo:done=>done(apps),launch(){}},systeminfo:{getPropertyValue(n,done,fail){
++      if(n==='VIDEOSOURCE')done({connected:[{type:'HDMI',number:1},{type:'HDMI',number:2}],disconnected:[]});else fail&&fail();},addPropertyValueChangeListener(){}}};
++  });
++  await page.goto('/');await page.waitForFunction(()=>AeroTizen.apps.ready&&document.querySelector('#grid > .tile.focused'));
++  const input=page.locator('#inputs > .tile').first();
++  await expect(input).toBeAttached();
++  // The section heading too: nothing of the inputs shows until Down.
++  const top=async()=>(await page.locator('#inputs-section').boundingBox()).y;
++  expect(await top()).toBeGreaterThanOrEqual(1080);
++  await page.keyboard.press('ArrowDown');
++  await expect(input).toHaveClass(/focused/);
++  await expect.poll(async()=>(await input.boundingBox()).y+(await input.boundingBox()).height).toBeLessThanOrEqual(1080);
++  await expect(page.locator('#home-root')).toHaveClass(/home-scrolled/);
++  await page.keyboard.press('ArrowUp');
++  await expect.poll(top).toBeGreaterThanOrEqual(1080);
++  await expect(page.locator('#home-root')).not.toHaveClass(/home-scrolled/);
++});
+diff --git a/tests/browser/continue_watching.spec.cjs b/tests/browser/continue_watching.spec.cjs
+index 19570df..b25187a 100644
+--- a/tests/browser/continue_watching.spec.cjs
++++ b/tests/browser/continue_watching.spec.cjs
+@@ -19,7 +19,7 @@ test('opt-in discovery, selection, merged row, remote navigation, launch and res
+   });
+   await page.addInitScript(({ prime, itv, channel4 }) => {
+     if (!localStorage.getItem('aerotizen.settings.v1')) localStorage.setItem('aerotizen.settings.v1', JSON.stringify({
+-      home: [prime], tempUnit: 'C', timeFormat: '24', background: 'black', showWeather: false
++      home: [prime], tempUnit: 'C', timeFormat: '24', theme: 'classic', background: 'black', showWeather: false
+     }));
+     const apps = [
+       { id: prime, name: 'Prime Video', packageId: prime },
+@@ -48,6 +48,7 @@ test('opt-in discovery, selection, merged row, remote navigation, launch and res
+   await expect(page.locator('#continue-section')).toBeHidden();
+   expect(reads).toEqual([]);
+   await page.locator('#gear').click();
++  await page.locator('[data-key="section:apps"]').click();
+   await page.locator('[data-key="continue-watching:true"]').click();
+   await expect(page.locator('.continue-option')).toHaveCount(3);
+   await expect(page.locator('.continue-option')).not.toContainText(['BBC iPlayer']);
+@@ -128,6 +129,7 @@ test('opt-in discovery, selection, merged row, remote navigation, launch and res
+   await page.reload();
+   await expect(page.locator('.continue-card')).toHaveCount(7);
+   await page.locator('#gear').click();
++  await page.locator('[data-key="section:apps"]').click();
+   await page.locator('[data-key="continue-watching:false"]').click();
+   const stopped = reads.length;
+   await page.keyboard.press('Escape');
+diff --git a/tests/browser/home_continue_navigation.spec.cjs b/tests/browser/home_continue_navigation.spec.cjs
+index 52ad469..02db2cc 100644
+--- a/tests/browser/home_continue_navigation.spec.cjs
++++ b/tests/browser/home_continue_navigation.spec.cjs
+@@ -25,7 +25,7 @@ for (const scenario of [
+         id: i ? 'testpkg00' + i + '.App' : prime, packageId: 'testpkg00' + i, name: i ? 'App ' + i : 'Prime Video'
+       }));
+       localStorage.setItem('aerotizen.settings.v1', JSON.stringify({
+-        home: apps.map(app => app.id), cardSize: size, background: 'black', showWeather: false,
++        home: apps.map(app => app.id), cardSize: size, theme: 'classic', background: 'black', showWeather: false,
+         continueWatching: true, continueWatchingApps: [prime]
+       }));
+       window.tizen = { application: {
+@@ -86,7 +86,7 @@ for (const settingsOpen of [false, true]) {
+     }));
+     await page.addInitScript(prime => {
+       localStorage.setItem('aerotizen.settings.v1', JSON.stringify({
+-        home: [prime], background: 'black', showWeather: false,
++        home: [prime], theme: 'classic', background: 'black', showWeather: false,
+         continueWatching: true, continueWatchingApps: [prime]
+       }));
+       window.tizen = { application: {
+diff --git a/tests/browser/home_page_motion.spec.cjs b/tests/browser/home_page_motion.spec.cjs
+index 54e8abd..1077657 100644
+--- a/tests/browser/home_page_motion.spec.cjs
++++ b/tests/browser/home_page_motion.spec.cjs
+@@ -3,7 +3,7 @@ for(const glassSettings of [false,true]) {
+   test(`${glassSettings?'Glass':'Classic'} page reveals preserve cached artwork and accept immediate remote input`,async({page})=>{
+     await page.route('https://**/*',r=>r.fulfill({body:'{}'}));
+     await page.route('http://127.0.0.1:47790/**',r=>r.fulfill({body:'{}'}));
+-    await page.addInitScript(glassSettings=>localStorage.setItem('aerotizen.settings.v1',JSON.stringify({glassSettings,home:['demo0','demo1','demo2','demo3'],background:'black',showWeather:false})),glassSettings);
++    await page.addInitScript(glassSettings=>localStorage.setItem('aerotizen.settings.v1',JSON.stringify({glassSettings,theme:'classic',home:['demo0','demo1','demo2','demo3'],background:'black',showWeather:false})),glassSettings);
+     await page.goto('/');await page.waitForFunction(()=>AeroTizen.apps.ready);
+     await page.evaluate(()=>{window.savedHomeCard=document.querySelector('#grid > .tile');});
+     expect(await page.locator('#aero-tab-glider').evaluate(n=>getComputedStyle(n).transitionProperty)).toBe('none');
+diff --git a/tests/browser/home_preact.spec.cjs b/tests/browser/home_preact.spec.cjs
+index 604d0dc..0196ad5 100644
+--- a/tests/browser/home_preact.spec.cjs
++++ b/tests/browser/home_preact.spec.cjs
+@@ -38,8 +38,9 @@ test('compiled Home preserves legacy geometry and artwork source selection at 10
+   const baseline = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+   await baseline.route('https://**/*', route => route.fulfill({ body: '{}' }));
+   await baseline.route('http://127.0.0.1:47790/**', route => route.fulfill({ body: '{}' }));
+-  const seed = () => localStorage.setItem('aerotizen.settings.v1', JSON.stringify({home:['demo0','demo1','demo2','demo3'],background:'black',showWeather:false}));
++  const seed = () => localStorage.setItem('aerotizen.settings.v1', JSON.stringify({home:['demo0','demo1','demo2','demo3'],theme:'classic',background:'black',showWeather:false}));
+   await baseline.addInitScript(seed);
++  await page.addInitScript(seed);
+   await baseline.goto('http://127.0.0.1:8170/'); await page.goto('/');
+   for (const tab of [baseline,page]) await tab.waitForFunction(() => AeroTizen.apps.ready && document.querySelector('#grid > .tile.focused'));
+   const geometry = tab => tab.evaluate(() => ['.topbar','#gear','#grid','#inputs'].map(selector => {
+diff --git a/tests/browser/home_scroll.spec.cjs b/tests/browser/home_scroll.spec.cjs
+index 95d2243..f1f9eaa 100644
+--- a/tests/browser/home_scroll.spec.cjs
++++ b/tests/browser/home_scroll.spec.cjs
+@@ -2,7 +2,7 @@ const {test,expect}=require('@playwright/test');
+ test('Home interpolates the top fade without replacing its mask and keeps the bottom fade fixed',async({page},info)=>{
+   await page.route('https://**/*',r=>r.fulfill({body:'{}'}));
+   await page.route('http://127.0.0.1:47790/**',r=>r.fulfill({body:'{}'}));
+-  await page.addInitScript(()=>localStorage.setItem('aerotizen.settings.v1',JSON.stringify({home:Array.from({length:12},(_,i)=>'demo'+i),background:'black',showWeather:false})));
++  await page.addInitScript(()=>localStorage.setItem('aerotizen.settings.v1',JSON.stringify({home:Array.from({length:12},(_,i)=>'demo'+i),theme:'classic',background:'black',showWeather:false})));
+   await page.goto('/');await page.waitForFunction(()=>AeroTizen.apps.ready);
+   const viewport=page.locator('.content-viewport'), mask=page.locator('.content-mask');
+   await expect(viewport).not.toHaveClass(/is-scrolled/);
+diff --git a/tests/browser/settings.spec.cjs b/tests/browser/settings.spec.cjs
+index c13fa55..80cff0e 100644
+--- a/tests/browser/settings.spec.cjs
++++ b/tests/browser/settings.spec.cjs
+@@ -27,9 +27,12 @@ const openSettings = async (page, waitForApps = true) => {
+     AeroTizen.settings.save(); AeroTizen.settingsUi.open();
+   });
+   await expect(page.locator('#editor')).toBeVisible();
+-  await expect(page.locator('[data-key="bg:black"]')).toHaveClass(/focused/);
++  await expect(page.locator('[data-key="section:appearance"]')).toHaveClass(/focused/);
+ };
+ 
++// Settings is split into category tabs; only the chosen category is visible to a pointer.
++const showSection = (page, id) => page.locator('[data-key="section:' + id + '"]').click();
++
+ test('compiled Settings escape waits for /leave before launching native Samsung Home by remote', async ({ page }) => {
+   await page.addInitScript(() => {
+     window.nativeLaunches = [];
+@@ -108,6 +111,7 @@ test('failed artwork retries from the first candidate on reopen while loaded art
+     AeroTizen.settingsUi.open();
+     return { loaded, failed };
+   });
++  await showSection(page, 'apps');
+   const loadedTile = page.locator('[data-key="app:' + ids.loaded + '"]');
+   const failedTile = page.locator('[data-key="app:' + ids.failed + '"]');
+   await expect(loadedTile).toHaveClass(/has-artwork/);
+@@ -126,10 +130,12 @@ test('failed artwork retries from the first candidate on reopen while loaded art
+ 
+ test('the first pointer click activates its control; Space activates buttons without consuming input spaces', async ({ page }) => {
+   await openSettings(page);
++  await showSection(page, 'clock');
+   const time = page.locator('[data-key="time:12"]');
+   await time.click();
+   await expect(time).toHaveAttribute('aria-pressed', 'true');
+   expect(await page.evaluate(() => AeroTizen.settings.timeFormat)).toBe('12');
++  await showSection(page, 'appearance');
+   await page.locator('[data-key="bg:lava"]').focus();
+   await page.keyboard.press('Space');
+   await expect(page.locator('[data-key="bg:lava"]')).toHaveAttribute('aria-pressed', 'true');
+@@ -138,6 +144,7 @@ test('the first pointer click activates its control; Space activates buttons wit
+   await expect(page.locator('body')).toHaveClass(/previewing/);
+   await page.keyboard.press('Space');
+   await expect(page.locator('body')).not.toHaveClass(/previewing/);
++  await showSection(page, 'clock');
+   const input = page.getByRole('textbox', { name: 'Weather location', exact: true });
+   await input.fill('A');
+   await page.keyboard.press('Space');
+@@ -146,6 +153,7 @@ test('the first pointer click activates its control; Space activates buttons wit
+ 
+ test('an unrelated preference does not remeasure navigation; removed controls restore focus', async ({ page }) => {
+   await openSettings(page);
++  await showSection(page, 'clock');
+   await page.locator('[data-key="time:12"]').click();
+   await expect(page.locator('[data-key="time:12"]')).toHaveAttribute('aria-pressed', 'true');
+   await page.evaluate(() => {
+@@ -158,6 +166,7 @@ test('an unrelated preference does not remeasure navigation; removed controls re
+   });
+   await expect(page.locator('[data-key="time:24"]')).toHaveAttribute('aria-pressed', 'true');
+   expect(await page.evaluate(() => window.layoutReads)).toBe(0);
++  await showSection(page, 'appearance');
+   await page.evaluate(() => { AeroTizen.settings.background = 'aurora'; AeroTizen.settings.save(); });
+   await page.locator('[data-key="speed"]').focus();
+   await page.keyboard.press('Enter');
+@@ -172,6 +181,7 @@ test('an unrelated preference does not remeasure navigation; removed controls re
+ test('date previews stay stable during an opening and refresh on the next opening', async ({ page }) => {
+   await page.clock.setFixedTime(new Date('2026-10-24T12:10:00Z'));
+   await openSettings(page);
++  await showSection(page, 'clock');
+   const time = page.locator('[data-key="time:24"]');
+   const original = await time.textContent();
+   await page.clock.setFixedTime(new Date('2026-10-24T13:10:00Z'));
+@@ -202,6 +212,7 @@ test('late TV inventory and hot-plug updates reach Settings without a preference
+   await page.evaluate(() => testTv.apps.shift()([{ id: 'review-one', name: 'First app', packageId: '1234567890' }]));
+   await expect(page.locator('[data-key="app:review-one"]')).toHaveAttribute('aria-label', 'First app');
+   await page.evaluate(() => testTv.inputs.shift()({ connected: [{ type: 'HDMI', number: 1, editName: 'Console' }], disconnected: [] }));
++  await showSection(page, 'inputs');
+   const input = page.getByRole('textbox', { name: 'HDMI 1 name', exact: true });
+   await input.fill('Unsaved draft');
+   await page.evaluate(() => {
+diff --git a/tests/browser/settings_card_independence.spec.cjs b/tests/browser/settings_card_independence.spec.cjs
+index 7918e2c..f3edf26 100644
+--- a/tests/browser/settings_card_independence.spec.cjs
++++ b/tests/browser/settings_card_independence.spec.cjs
+@@ -10,6 +10,8 @@ test('Home card shape and columns never change standard Settings icons or artwor
+   for(const size of before)expect(size[0]).toBe(size[1]);
+   await page.evaluate(()=>{window.settingsIconNodes=Array.from(document.querySelectorAll('#all-apps > .tile'));});
+   await category('appearance');
++  // The redesign's default is a fixed 4-column layout; Big/Small only shows for automatic columns.
++  await page.locator('[data-key="home-card-columns:auto"]').click();
+   await expect(page.locator('#card-sizes')).toBeVisible();
+   await page.locator('[data-key="card-sizes:small"]').click();
+   for(const columns of ['3','4','5']) {
+diff --git a/tests/settings_focus.browser.js b/tests/settings_focus.browser.js
+index f3c64f2..190fcd5 100644
+--- a/tests/settings_focus.browser.js
++++ b/tests/settings_focus.browser.js
+@@ -10,12 +10,16 @@ const runSettingsFocus = async page => {
+     AeroTizen.settings.background = 'aurora'; AeroTizen.settings.save();
+     AeroTizen.settingsUi.open();
+   });
++  // Settings opens on the category tabs; pick the swatch to test arrow movement inside a section.
++  await page.waitForFunction(() => document.activeElement?.getAttribute('data-key') === 'section:appearance');
++  await page.locator('[data-key="bg:aurora"]').click();
+   await page.waitForFunction(() => document.activeElement?.getAttribute('data-key') === 'bg:aurora');
+   await page.keyboard.press('ArrowDown');
+   await page.waitForFunction(() => document.activeElement?.getAttribute('data-key')?.startsWith('bg:') &&
+     document.activeElement.getAttribute('data-key') !== 'bg:aurora');
+   await page.keyboard.press('ArrowUp');
+   await page.waitForFunction(() => document.activeElement?.getAttribute('data-key') === 'bg:aurora');
++  await page.locator('[data-key="section:inputs"]').click();
+   await page.locator('[data-key="name:HDMI 1"]').click();
+   await page.locator('[data-key="name:HDMI 1"] input').fill('React draft');
+   await page.keyboard.press('Enter');
+diff --git a/tests/settings_services.test.cjs b/tests/settings_services.test.cjs
+index 2e12f3f..69051f8 100644
+--- a/tests/settings_services.test.cjs
++++ b/tests/settings_services.test.cjs
+@@ -9,7 +9,7 @@ test('Settings resolves the optional native Home command at activation and prese
+   try {
+     const calls = [];
+     const homewatch = { useSamsungHome() { assert.equal(this, homewatch); calls.push('legacy'); } };
+-    const services = createSettingsServices({ clock: {}, homewatch });
++    const services = createSettingsServices({ clock: {}, homewatch, theme: {} });
+     services.useSamsungHome();
+     homewatch.openSamsungHome = function () { assert.equal(this, homewatch); calls.push('native'); };
+     services.useSamsungHome();
+diff --git a/tests/settings_ui.browser.js b/tests/settings_ui.browser.js
+index 4d6f17f..05c2561 100644
+--- a/tests/settings_ui.browser.js
++++ b/tests/settings_ui.browser.js
+@@ -13,7 +13,9 @@ const runSettingsUi = async (page, { baselineUrl, screenshotPath }) => {
+       current: { temperature_2m: 20, weather_code: 0 }, results: [] }) }));
+   for (const variant of ['baseline', 'preact']) {
+     await page.goto(variant === 'preact' ? preactUrl : baselineUrl);
+-    await page.evaluate(() => { localStorage.clear(); });
++    // Factory settings, minus the one-time TV-layout switch, which would replace the moving
++    // wallpaper this walkthrough exercises (Preview, speed slider).
++    await page.evaluate(() => { localStorage.clear(); localStorage.setItem('aerotizen.settings.v1', JSON.stringify({ layoutVersion: 2 })); });
+     await page.reload();
+     await page.waitForFunction(() => window.AeroTizen && AeroTizen.apps.all.length > 0);
+     const check = await page.evaluate(async variant => {
+@@ -34,12 +36,16 @@ const runSettingsUi = async (page, { baselineUrl, screenshotPath }) => {
+       const before = JSON.stringify(A.settings.home);
+       // Use the real home -> gear -> OK -> Settings route.
+       key(K.UP);
++      // Classic puts the gear left of the tabs; the glass layout puts it right of them.
+       for (let step = 0; step < 4 && !document.getElementById('gear').classList.contains('focused'); step++) key(K.LEFT);
++      for (let step = 0; step < 4 && !document.getElementById('gear').classList.contains('focused'); step++) key(K.RIGHT);
+       assert(document.getElementById('gear').classList.contains('focused'), 'gear is reachable through the header controls');
+       key(K.ENTER); key(K.ENTER, 'keyup');
+       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+       assert(A.settingsUi.isOpen(), 'remote opens Settings');
+-      assert(document.querySelector('#editor .focused').dataset.key === 'bg:aurora', 'initial focus');
++      // The compiled Settings opens on its category tabs; the legacy page opens on the background swatch.
++      // The TV layout swaps a moving default wallpaper for a still one, so read the current one.
++      assert(document.querySelector('#editor .focused').dataset.key === (variant === 'preact' ? 'section:appearance' : 'bg:' + A.settings.background), 'initial focus');
+       if (variant === 'preact') {
+         assert(document.activeElement === document.querySelector('#editor .focused'), 'remote state and browser focus agree');
+         assert(document.querySelectorAll('#editor [data-key][tabindex="0"]').length === 1, 'one remote control is in the tab order');
+@@ -64,10 +70,14 @@ const runSettingsUi = async (page, { baselineUrl, screenshotPath }) => {
+       find('network-visibility:true').click(); assert(!A.$('network').hasAttribute('hidden'), 'network restored');
+       find(variant === 'preact' ? 'live-tv-visibility:false' : 'live-tv:false').click();
+       assert(A.settings.showLiveTv === false, 'Live TV hidden');
++      // The redesign's default is a fixed 4-column layout, which hides the Big/Small choice.
++      if (variant === 'preact') find('home-card-columns:auto').click();
+       find(variant === 'preact' ? 'card-sizes:small' : 'cards:small').click();
+       assert(A.settings.cardSize === 'small', 'card size saved');
+       find(variant === 'preact' ? 'input-visibility:true' : 'inputs:true').click();
+       assert(!Array.from(document.querySelector('#inputs').children).some(el => el.textContent === 'HDMI 2'), 'disconnected HDMI hidden');
++      // A hidden category cannot take browser focus, so open the one that holds the name fields.
++      if (variant === 'preact') find('section:inputs').click();
+       let name = find('name:HDMI 1').querySelector('input');
+       find('name:HDMI 1').click(); input(name, 'Test console');
+       key(K.IME_DONE);
+@@ -114,6 +124,7 @@ const runSettingsUi = async (page, { baselineUrl, screenshotPath }) => {
+       find('bg:black').click(); assert(document.querySelector('#speed-row').hidden, 'static background hides speed');
+       find('bg:aurora').click();
+       A.settingsUi.close(); A.settingsUi.open();
++      if (variant === 'preact') find('bg:aurora').click();
+       // Move from the first swatch row to the speed slider using only remote arrows.
+       for (let i = 0; i < 9; i++) key(K.LEFT);
+       key(K.DOWN); key(K.DOWN);
+@@ -143,7 +154,9 @@ const runSettingsUi = async (page, { baselineUrl, screenshotPath }) => {
+       assert(document.querySelector('#editor').scrollTop > 0, 'focus scrolls into view');
+       key(K.ESC); assert(!A.settingsUi.isOpen(), 'Back closes Settings');
+       A.settings.home = []; A.settings.save(); A.homeScreen.render(); A.settingsUi.open(); A.settingsUi.close();
+-      assert(A.settings.home.length === 0 && !document.querySelector('#grid').children.length, 'empty Home stays empty');
++      // Walking right to the gear crosses All apps, which opens that page, so check the Home grid itself.
++      const homeGrid = document.querySelector('[aria-label="Home apps"]') || document.querySelector('#grid');
++      assert(A.settings.home.length === 0 && !homeGrid.children.length, 'empty Home stays empty');
+       A.settings.home = JSON.parse(before); A.settings.background = 'black'; A.settings.speed = 1; A.settings.save();
+       A.applyBackground(); A.homeScreen.render();
+       return { variant, remote: true, persistence: true, staleSearch: true, preview: true, emptyHome: true };
+@@ -194,6 +207,9 @@ const runSettingsUi = async (page, { baselineUrl, screenshotPath }) => {
+   const lifecycle = await page.evaluate(async () => {
+     const A = AeroTizen;
+     const find = key => document.querySelector('#editor [data-key="' + key + '"]');
++    // The compiled Settings hides inactive categories, and a hidden field cannot take focus.
++    const inputsTab = find('section:inputs');
++    if (inputsTab) { inputsTab.click(); await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))); }
+     const field = find('name:HDMI 1').querySelector('input');
+     field.focus(); field.value = 'Local draft'; field.dispatchEvent(new Event('input', { bubbles: true }));
+     A.settings.inputNames = { 'HDMI 1': 'Concurrent value' }; A.settings.save();
+diff --git a/tests/startup.test.cjs b/tests/startup.test.cjs
+index b971c2f..62261f2 100644
+--- a/tests/startup.test.cjs
++++ b/tests/startup.test.cjs
+@@ -15,7 +15,7 @@ function harness(mode = 'deferred', saved = ['youtube.id']) {
+   } } }, catalog: { preloadedStoreId: () => null },
+   settings: { home: saved, load() {}, save() { calls.push('save'); } },
+   continueWatching: { start() {} },
+-  clock: { start() {}, tick() {} }, network: { start() {} },
++  clock: { start() {}, tick() {} }, theme: { start() {} }, network: { start() {} },
+   inputs: { load() {} }, settingsUi: { isOpen: () => false },
+   homewatch: { start() {}, reportApps() {}, reportStartup() {} },
+   homeScreen: { render() { calls.push('render'); }, refreshApps() { calls.push('refresh'); } }
