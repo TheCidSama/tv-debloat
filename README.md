@@ -24,10 +24,9 @@ Screenshots are from a 2025 Samsung QLED (Tizen 9) running the launcher this ski
   - a big clock, a row of apps along the bottom, and a halo in the focused app's colour
   - inputs one press below the screen, and tabs that switch as soon as you move onto them
   - a layout built to stay smooth on TV hardware
-- **Android TV / Google TV / Fire TV:** connects over `adb`, then points you to
-  [tv-detox](https://github.com/Ansub/tv-detox) for the launcher. Debloating is
-  reversible: it disables apps instead of deleting them, and keeps a list of packages it
-  must never touch.
+- **Android TV / Google TV / Fire TV:** connects over `adb` and installs a launcher APK.
+  Debloating is reversible: it disables apps instead of deleting them, and keeps a list
+  of packages it must never touch.
 - **LG webOS, Roku and others:** says clearly what isn't possible without rooting (it
   won't root anything) and does the cleanup that is.
 - **Bloatware, tracking and ads:** removes the apps the TV allows. It switches off
@@ -95,8 +94,6 @@ docs/screenshots/
 - [AeroTizen](https://github.com/helalaou/AeroTizen) (MIT) does the Samsung work: the CLI,
   the launcher, native Home and the DNS lists. The patch here is a derivative of it under
   the same license.
-- [tv-detox](https://github.com/Ansub/tv-detox) (MIT) inspired this skill and is the
-  launcher it recommends for Android TV and Google TV.
 
 ## License
 

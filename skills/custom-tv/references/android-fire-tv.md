@@ -1,9 +1,8 @@
 # Android TV, Google TV, Chromecast and Fire TV
 
-These use `adb`. A tested, MIT-licensed implementation for Android TV / Google TV is
-[tv-detox](https://github.com/Ansub/tv-detox) (tiny launcher APK, `install.sh`, `undo.sh`,
-`candidates.sh`, and a careful debloat guide). Prefer it over writing a launcher from
-scratch, and read its `docs/debloat.md` before disabling anything.
+These use `adb`. Prefer an existing, maintained open-source TV launcher APK over writing
+one from scratch; check its README for the user's device and for its own undo steps
+before installing it.
 
 Install `adb`: macOS `brew install android-platform-tools`; Linux
 `sudo apt install adb` (or the distro's `android-tools`); Windows: Google's
@@ -46,7 +45,7 @@ Save the outputs locally before changing anything; the disabled list is the undo
 
 - Install a launcher APK: `adb install launcher.apk`.
 - The safest way to make it Home **leaves the stock launcher enabled** and catches the Home
-  button with the launcher's own accessibility service (tv-detox's approach since v1.4.1).
+  button with the launcher's own accessibility service.
 - Disabling the stock launcher makes the new one the only Home, but it is the step that
   bricks devices: **never disable `com.google.android.apps.tv.launcherx` on Google TV /
   Chromecast** (reported to need a factory reset), and don't disable a launcher before the
@@ -87,7 +86,10 @@ Keep the screensaver on for OLED panels (burn-in).
 ```sh
 adb connect TV_IP:5555
 adb wait-for-device
-for p in $(adb shell pm list packages -d | tr -d '\r' | sed 's/package://'); do adb shell pm enable "$p"; done
+# Re-enable every package that is currently disabled.
+adb shell pm list packages -d | tr -d '\r' | cut -d: -f2 | while read -r pkg; do
+  adb shell pm enable "$pkg" < /dev/null   # adb would otherwise swallow the loop's input
+done
 ```
 
 Afterwards the user turns USB / wireless debugging **off**: otherwise other devices on
