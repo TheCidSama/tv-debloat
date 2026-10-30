@@ -1,4 +1,4 @@
-# customTV
+# tv-debloat
 
 ![Before: an ad-filled stock home screen. After: your own home screen, no ads](docs/hero.png)
 
@@ -45,9 +45,9 @@ Screenshots are from a 2025 Samsung QLED (Tizen 9) running the launcher this ski
 Copy `skills/custom-tv` into your agent's skills folder, for example:
 
 ```sh
-git clone <this repository's URL> customTV
-cp -r customTV/skills/custom-tv ~/.claude/skills/      # Claude Code
-cp -r customTV/skills/custom-tv ~/.ccode/skills/       # CCode
+git clone <this repository's URL> tv-debloat
+cp -r tv-debloat/skills/custom-tv ~/.claude/skills/      # Claude Code
+cp -r tv-debloat/skills/custom-tv ~/.ccode/skills/       # CCode
 ```
 
 Then paste this into your agent, with your TV's details filled in:
