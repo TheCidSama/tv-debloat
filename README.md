@@ -50,10 +50,24 @@ cp -r customTV/skills/custom-tv ~/.claude/skills/      # Claude Code
 cp -r customTV/skills/custom-tv ~/.ccode/skills/       # CCode
 ```
 
-Then ask your agent something like:
+Then paste this into your agent, with your TV's details filled in:
 
-> My Samsung TV is at 192.168.1.50, model QE55Q7FAAUXXU. Give it a clean home screen
-> that opens at power-on, remove the bloatware and turn off the tracking.
+```text
+Use the custom-tv skill. My TV is a <brand and model>, at <TV IP>, on the same Wi-Fi
+as this computer.
+
+1. First tell me the risks in plain words and wait for my go-ahead.
+2. Walk me through anything I have to do on the TV myself.
+3. Before changing anything, list every app in three groups: needed by the TV,
+   apps I use, and safe to turn off. Note free memory if the TV shows it.
+4. Back up first, ask me before every single change, turn apps off rather than
+   delete them where possible, and keep a log of each change and its undo.
+5. Give me a clean home screen that opens with the Home button and at power-on.
+6. Turn off tracking and block ads with DNS, explaining each setting.
+7. Ask me if the TV is OLED; if it is, keep the screensaver on.
+8. At the end, restart the TV once and check it starts normally before saying
+   you're done, then show me the change log and how to undo everything.
+```
 
 The agent will ask before every change. A few steps happen on the TV (Developer Mode, a
 Samsung sign-in for the signing certificate, unplugging the TV once), and it tells you

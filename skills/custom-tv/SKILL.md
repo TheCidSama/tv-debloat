@@ -29,6 +29,23 @@ back up before every write, change one thing at a time, and keep a way back.**
 - Things the user does on the TV (sign-ins, menu settings, unplugging) are theirs. Say
   exactly where the menu is, then wait for them.
 
+## Before anything else: the risk talk
+
+Before the first change of the session (read-only checks may come first), tell the user
+in plain words, then ask whether they want to go ahead:
+
+- This uses developer features the TV maker doesn't support. It can turn off or remove
+  apps and change what the TV opens at Home and at power-on.
+- A few TVs have got stuck at the logo or kept restarting after changes like these.
+- You are an AI and can make mistakes, which is why you ask before every change and keep
+  backups and an undo list.
+- How to undo, for their platform, in one or two lines (e.g. `aerotizen home restore` and
+  re-enabling apps on the TV; `pm enable` for every disabled package on Android).
+- They are responsible for their own TV.
+
+Start only after a clear yes. If they hesitate, offer the read-only survey and the menu
+privacy settings, which change nothing risky.
+
 ## Asking the user
 
 A TV is shared, used daily and hard to recover, and the agent can be wrong about which
@@ -51,8 +68,11 @@ Go ahead? (yes / no / skip)
   removal or disable, DNS or network settings, and every launcher reinstall are separate.
 - Silence, "ok" to an explanation, or a goal statement ("remove the bloatware") is not
   approval for a specific command; turn it into a list and ask.
-- Never guess which apps are bloat. Show the classified list (keep / never touch /
-  candidate) and let the user pick; streaming apps are always the user's choice.
+- Never guess which apps are bloat. List every app in plain words, in three groups:
+  **needed by the TV** (never touch), **apps you use** (the user's, keep unless told), and
+  **safe to turn off** (candidates, with one line on what each does). Let the user pick;
+  streaming apps are always the user's choice. If you're not sure what a package does,
+  it goes in "needed by the TV" and stays on.
 - If a result surprises you (an app you didn't expect, a refusal, a warning about
   backups or compatibility), stop and tell the user before doing anything else.
 - Ask before installing anything on the computer outside the working folder (SDKs,
@@ -79,6 +99,18 @@ then make the change.
 - Tell the user to keep the certificate and backup folders; say what is lost without them.
 - If a backup step fails or refuses, don't proceed with the change.
 
+### The change log
+
+Keep a running log for the session in a dated file outside any repository (e.g.
+`~/customtv/changes-YYYY-MM-DD.md`). Add a line right after each change succeeds:
+
+```
+| time | change | command | result | undo |
+```
+
+Record refusals and skipped steps too. Show the log at the end; it is the user's undo
+list if anything goes wrong later, so tell them where it is.
+
 ## 1. Identify the TV and the computer (read-only)
 
 Ask for, or detect: brand, model number, year, OS (Tizen / Android TV / Google TV /
@@ -100,21 +132,35 @@ Host-specific setup (Python/Node/.NET, the macOS certificate error, Windows path
 ## 2. The usual sequence
 
 1. **Status, read-only.** Confirm developer access works and list installed apps.
-   Save the app list locally (outside any repo) so you can compare later.
-2. **Back up** anything you will change, and confirm it (see "Backups").
-3. **Install the home screen** (ask first). Stock first, check it opens, then customise.
-4. **Make it Home and the power-on app** (ask first) where the platform allows, and verify by
+   Save the app list locally (outside any repo) so you can compare later. Note free
+   memory where the platform shows it (Android: `adb shell cat /proc/meminfo`, MemAvailable);
+   Samsung's developer shell doesn't expose it, so skip it there and say so.
+   Ask whether the panel is OLED if the model name doesn't make it obvious.
+2. **The risk talk**, then a yes (see above).
+3. **Back up** anything you will change, and confirm it (see "Backups").
+4. **Install the home screen** (ask first). Stock first, check it opens, then customise.
+5. **Make it Home and the power-on app** (ask first) where the platform allows, and verify by
    pressing Home from inside an app (Netflix/YouTube) and by a full power cycle
    (unplug 60 s; a remote power-off is not a cold boot).
-5. **Debloat** only after the launcher works. Classify apps (keep / never touch /
+6. **Debloat** only after the launcher works. Classify apps (keep / never touch /
    candidate) and remove or disable only what the user picks, one confirmed change at a
    time. Prefer *disable* over *uninstall* where both exist, because disable is trivially
    reversible. Check the TV still works (Home, inputs, Wi-Fi, remote) after each.
-6. **Privacy and ads:** TV menu settings plus DNS blocking — see
+7. **Privacy and ads:** TV menu settings plus DNS blocking — see
    `references/privacy-and-ads.md`.
-7. **Report** what changed, what was refused and why, where the backups are, and the
-   exact undo commands. Remind the user to turn off debugging (Android/Fire TV) and to
-   keep the screensaver on for OLED panels.
+8. **Optional speed and power settings** (ask first): shorter animations on Android/Fire TV,
+   an auto-sleep timer the user picks. On OLED panels keep the screensaver on; never
+   turn it off unless the user says the panel isn't OLED.
+9. **Prove it before saying done.** About 30 seconds after the last change, restart the TV
+   once (Android: `adb reboot`, with a yes; Samsung: the user unplugs it for 60 s). Check
+   it starts normally, lands on the new home screen, and Home, inputs, Wi-Fi and the remote
+   work. Show free memory before and after where available. If it doesn't start
+   normally, go straight to the undo steps in the change log.
+10. **Report** what changed, what was refused and why, where the backups and change log
+    are, and the exact undo commands. Then remind the user to turn off USB / network /
+    wireless debugging on Android and Fire TV (left on, other devices on the network can
+    ask to control the TV; turn it on again only to undo or update), and to keep the
+    certificate and backup folders on Samsung.
 
 ## 3. Customising the launcher (Samsung / AeroTizen)
 
