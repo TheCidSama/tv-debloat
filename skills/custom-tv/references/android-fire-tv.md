@@ -4,6 +4,10 @@ These use `adb`. Prefer an existing, maintained open-source TV launcher APK over
 one from scratch; check its README for the user's device and for its own undo steps
 before installing it.
 
+Read-only here: `adb devices`, `getprop`, `pm list`, `resolve-activity`. Everything else
+(`install`, `pm disable-user`, `pm uninstall`, `pm enable`, `settings put`) is a change:
+save the package lists first and ask, using the format in SKILL.md "Asking the user".
+
 Install `adb`: macOS `brew install android-platform-tools`; Linux
 `sudo apt install adb` (or the distro's `android-tools`); Windows: Google's
 "SDK Platform-Tools" zip, then use `adb.exe` from that folder.

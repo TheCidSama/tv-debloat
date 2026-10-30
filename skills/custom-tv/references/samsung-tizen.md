@@ -6,6 +6,11 @@ Studio is needed. Check AeroTizen's README "Tested on" table for the user's mode
 year; 2023–2026 models on Tizen 9 are the best covered. Known model issues are linked
 there (for example cold-boot and native-Home issues on some 2020–2022 models).
 
+Read-only here: `status`, `apps`, `home status`, `home apply` without `--yes`, `launch`.
+Everything else (`certs`, `install`, `home backup`, `home apply --yes`, `home restore
+--yes`, `debloat --remove`, `uninstall`) is a change: back it up and ask first, using the
+format in SKILL.md "Asking the user".
+
 Replace `TV_IP` with the TV's address in every command. Examples use `aerotizen`; with a
 release archive it is `./aerotizen` (macOS/Linux) or `.\aerotizen.exe` (Windows).
 

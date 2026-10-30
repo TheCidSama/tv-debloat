@@ -1,5 +1,11 @@
 # customTV
 
+![Before: an ad-filled stock home screen. After: your own home screen, no ads](docs/hero.png)
+
+| 🧹 **Removes the junk** | 📺 **A calm home screen** | ↩️ **Undo anytime** |
+|---|---|---|
+| Bloatware, ads, sponsored rows and tracking, gone. | Your apps, your HDMI inputs and a clock. Nothing else. | Every change is backed up first and can be put back with one command. |
+
 An AI-agent skill that turns a smart TV into a fast, ad-free TV with **your own home
 screen**, from a computer on the same Wi-Fi. It walks the agent (Claude Code, CCode,
 Codex, or any agent that reads `SKILL.md` skills) through it step by step:
@@ -75,19 +81,47 @@ skills/custom-tv/
   scripts/tv_screenshots.mjs    capture the launcher on the TV (hides the weather location)
   scripts/check_dns_blocking.sh test which ad/tracking domains a DNS server blocks
   patches/                      the AeroTizen redesign
-docs/screenshots/
+docs/hero.png, docs/screenshots/
 ```
 
-## Safety
+## Notes and warnings
 
-- It only uses the manufacturer's own developer features: no root, no exploits, no
-  firmware changes. When the TV refuses something (Samsung's `can not uninstall app`),
-  the agent stops and tells you how to do it on the TV instead.
-- It backs up the TV's Home settings before changing them, and restoring them is one
-  command.
-- Signing certificates and backups stay on your computer. Keep them, and never commit
-  them.
-- Use at your own risk: none of this is supported by the TV makers.
+> [!WARNING]
+> **Do it at your own risk.** This changes how your TV starts and which apps it runs,
+> using developer features the TV makers don't support. TVs can get stuck at the logo or
+> keep restarting, and the AI can make mistakes. The skill asks you before every change
+> and backs up first, and `aerotizen home restore` (Samsung) or re-enabling the disabled
+> apps (Android) puts things back. This is what worked for us, not professional advice.
+> You're responsible for your own TV, and nobody here is liable if something goes wrong.
+
+> [!WARNING]
+> **Samsung: keep the certificate and backup folders.** `~/.config/aerotizen/certs/` signs
+> every launcher update; lose it and you have to uninstall and reinstall.
+> `~/.config/aerotizen/backups/` holds the TV's original Home settings, which `home restore`
+> needs. Never delete them or commit them anywhere. Restore Home *before* uninstalling the
+> launcher, then unplug the TV for 60 seconds.
+
+> [!WARNING]
+> **Google TV and Chromecast with Google TV:** don't turn off the TV's own home screen app
+> (`com.google.android.apps.tv.launcherx`). On some devices that left them stuck
+> restarting, and the only fix was a factory reset. The cleanup still works with it left
+> on.
+
+> [!WARNING]
+> **OLED TVs:** keep the screensaver on. It stops a still picture from burning into the
+> screen. Don't leave any home screen, this one included, on for hours.
+
+> [!NOTE]
+> **No root, no exploits.** It only uses the manufacturer's own developer features. When
+> the TV refuses something (Samsung's `can not uninstall app`), the agent stops and tells
+> you how to do it in the TV's menus instead.
+
+> [!NOTE]
+> **Turn debugging off afterwards (Android, Google TV, Fire TV).** While USB, network or
+> wireless debugging is on, other devices on your network can ask to control the TV. Turn
+> it off once setup is done, and back on only to undo or update. Samsung's Developer Mode
+> only accepts the one computer whose IP you entered; leave it on if you want updates and
+> `home restore` to keep working.
 
 ## Credits
 

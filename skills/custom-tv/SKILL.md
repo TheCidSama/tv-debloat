@@ -16,8 +16,9 @@ back up before every write, change one thing at a time, and keep a way back.**
   developer features. Never use root exploits, firmware patching, or anything that
   bypasses a "can not uninstall" or permission refusal. When the TV refuses, report it
   and give the on-TV route instead.
-- Ask before each class of change (install, Home/boot assignment, removing or disabling
-  apps, network settings). Approval for one doesn't cover the next.
+- Nothing changes on the TV or the network without the user's explicit yes, given for
+  that change (see "Asking the user" below). Read-only commands need no approval.
+- Nothing changes without a backup you have checked exists (see "Backups" below).
 - Keep personal data out of anything you write to files, commits, screenshots or issues:
   TV IP, Samsung/Google/LG account e-mails, certificate or device IDs (DUID, serial),
   the computer's user name, home-directory paths, and weather location. Use placeholders
@@ -27,6 +28,56 @@ back up before every write, change one thing at a time, and keep a way back.**
   using another tool, or the next one times out.
 - Things the user does on the TV (sign-ins, menu settings, unplugging) are theirs. Say
   exactly where the menu is, then wait for them.
+
+## Asking the user
+
+A TV is shared, used daily and hard to recover, and the agent can be wrong about which
+package is which. So the user approves every write, knowing what it does.
+
+Before each change, stop and ask in this shape, then wait for the answer:
+
+```
+Next change: <what, in plain words>
+Command: <the exact command>
+Risk: <what could go wrong; "low" only if it really is>
+Backup: <where the backup is, or why none is needed>
+Undo: <the exact command or menu path that reverses it>
+Go ahead? (yes / no / skip)
+```
+
+- One change per question. Batch only identical, low-risk actions the user has listed
+  themselves (e.g. "disable these 5 packages"), and still show the full list first.
+- Approval covers that change only. A new install, a Home/boot assignment, each app
+  removal or disable, DNS or network settings, and every launcher reinstall are separate.
+- Silence, "ok" to an explanation, or a goal statement ("remove the bloatware") is not
+  approval for a specific command; turn it into a list and ask.
+- Never guess which apps are bloat. Show the classified list (keep / never touch /
+  candidate) and let the user pick; streaming apps are always the user's choice.
+- If a result surprises you (an app you didn't expect, a refusal, a warning about
+  backups or compatibility), stop and tell the user before doing anything else.
+- Ask before installing anything on the computer outside the working folder (SDKs,
+  global npm packages, Homebrew formulas).
+- Steps only the user can do (sign-ins, Developer Mode, TV menus, unplugging): give the
+  exact menu path, then wait for them to say it's done; check the result read-only.
+
+## Backups
+
+Take the backup, confirm it exists and is readable, tell the user where it is, and only
+then make the change.
+
+| Before | Back up | How to confirm |
+|---|---|---|
+| Any change | App list and device status | `aerotizen … apps` / `adb shell pm list packages` saved to a dated file |
+| Samsung Home / boot assignment | Original Home values | `aerotizen … home backup`, then `home status` shows the backup path |
+| Samsung launcher reinstall | The cert folder `~/.config/aerotizen/certs/` | Folder exists; same cert used for install |
+| Android disable / uninstall | `pm list packages -d` and the current Home activity | Saved to a dated file before the first change |
+| Launcher code changes | The working tree (git) | Commit or copy before editing; the build output is separate |
+| TV DNS change | The current DNS values | User reads them out or screenshots the IP Settings screen |
+
+- Keep backups outside any repository, and never delete or overwrite one: AeroTizen keeps
+  the *original* Home values on purpose. New backups go next to old ones with a date.
+- Tell the user to keep the certificate and backup folders; say what is lost without them.
+- If a backup step fails or refuses, don't proceed with the change.
 
 ## 1. Identify the TV and the computer (read-only)
 
@@ -50,18 +101,20 @@ Host-specific setup (Python/Node/.NET, the macOS certificate error, Windows path
 
 1. **Status, read-only.** Confirm developer access works and list installed apps.
    Save the app list locally (outside any repo) so you can compare later.
-2. **Back up** anything you will change (Samsung: `aerotizen home backup`; Android:
-   the list of disabled packages and the current default launcher).
-3. **Install the home screen.** Stock first, check it opens, then customise.
-4. **Make it Home and the power-on app** where the platform allows, and verify by
+2. **Back up** anything you will change, and confirm it (see "Backups").
+3. **Install the home screen** (ask first). Stock first, check it opens, then customise.
+4. **Make it Home and the power-on app** (ask first) where the platform allows, and verify by
    pressing Home from inside an app (Netflix/YouTube) and by a full power cycle
    (unplug 60 s; a remote power-off is not a cold boot).
 5. **Debloat** only after the launcher works. Classify apps (keep / never touch /
-   candidate) and remove or disable only what the user picks. Prefer *disable* over
-   *uninstall* where both exist, because disable is trivially reversible.
+   candidate) and remove or disable only what the user picks, one confirmed change at a
+   time. Prefer *disable* over *uninstall* where both exist, because disable is trivially
+   reversible. Check the TV still works (Home, inputs, Wi-Fi, remote) after each.
 6. **Privacy and ads:** TV menu settings plus DNS blocking — see
    `references/privacy-and-ads.md`.
-7. **Report** what changed, what was refused and why, and the exact undo commands.
+7. **Report** what changed, what was refused and why, where the backups are, and the
+   exact undo commands. Remind the user to turn off debugging (Android/Fire TV) and to
+   keep the screensaver on for OLED panels.
 
 ## 3. Customising the launcher (Samsung / AeroTizen)
 
